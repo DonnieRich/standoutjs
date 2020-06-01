@@ -15,7 +15,7 @@
                         case "E":
                             $("#overlayStandout").css({
                                 "display": "block",
-                                "opacity": objProps.percentage() < 0.75 ? objProps.percentage() : 0.75
+                                "opacity": objProps.percentage(settings) < 0.75 ? objProps.percentage(settings) : 0.75
                             });
                             $("#"+id).css({
                                 "display": "block",
@@ -25,7 +25,7 @@
                                 "z-index": "10000",
                                 "width": objProps.elementWidth,
                                 "height": objProps.elementHeight,
-                                "opacity": objProps.percentage()
+                                "opacity": objProps.percentage(settings) < 1 ? objProps.percentage(settings) : 1
                             });
                             break;
                         case "C":
@@ -104,15 +104,15 @@
             } else if(this.elementCenterPosition > this.viewportHeight*opt.bottom && this.elementCenterPosition > this.viewportHeight*opt.top &&
                         this.elementTopPosition > this.viewportHeight*opt.bottom) {
                 status = "U";
-            }            
+            }
             console.log(status);
             return status;
         },
-        percentage: function() {
-                if(this.elementTopPosition+(this.elementHeight/2) <= this.viewportHeight/2) {
-                    opacity = (this.elementTopPosition+(this.elementHeight/2))/(this.viewportTop/2);
+        percentage: function(opt) {
+                if(this.elementCenterPosition <= this.viewportHeight/2) {
+                    opacity = (this.elementCenterPosition)/(this.viewportHeight*opt.bottom);
                 } else {
-                    opacity = (this.viewportTop/2)/(this.elementTopPosition-(this.elementHeight/2));
+                    opacity = (this.viewportHeight*opt.top)/(this.elementCenterPosition);
                 }
                 return opacity.toFixed(2);
         },
