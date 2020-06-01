@@ -86,6 +86,7 @@
         elementTop: 0,
         elementBottom: 0,
         elementTopPosition: 0,
+        elementCenterPosition: 0,
         elementBottomPosition: 0,
         viewportHeight: 0,
         viewportTop: 0,
@@ -95,13 +96,16 @@
         },
         status: function(opt) {
             let status = "E";
-            if(this.elementTopPosition >= this.viewportHeight*opt.top && this.elementBottomPosition <= this.viewportHeight*opt.bottom) {
+            if(this.elementCenterPosition >= this.viewportHeight*opt.top && this.elementCenterPosition <= this.viewportHeight*opt.bottom) {
                 status = "C";
-            } else if(this.elementTopPosition < this.viewportHeight*opt.bottom && this.elementBottomPosition < this.viewportHeight*opt.top) {
+            } else if(this.elementCenterPosition < this.viewportHeight*opt.bottom && this.elementCenterPosition < this.viewportHeight*opt.top &&
+                        this.elementBottomPosition < this.viewportHeight*opt.top) {
                 status = "O";
-            } else if(this.elementTopPosition > this.viewportHeight*opt.bottom && this.elementBottomPosition > this.viewportHeight*opt.top) {
+            } else if(this.elementCenterPosition > this.viewportHeight*opt.bottom && this.elementCenterPosition > this.viewportHeight*opt.top &&
+                        this.elementTopPosition > this.viewportHeight*opt.bottom) {
                 status = "U";
-            }
+            }            
+            console.log(status);
             return status;
         },
         percentage: function() {
@@ -117,11 +121,12 @@
             this.elementWidth = el.width();
             this.elementHeight = el.outerHeight();
             this.elementTop = el.offset().top;
-            this.elementBottom = this.elementTop + el.outerHeight();
+            this.elementBottom = this.elementTop + this.elementHeight;
             this.viewportHeight = $(window).height();
             this.viewportTop = $(window).scrollTop();
             this.viewportBottom = this.viewportTop + $(window).height();
             this.elementTopPosition = this.elementTop - this.viewportTop;
+            this.elementCenterPosition = this.elementTopPosition + (this.elementHeight/2);
             this.elementBottomPosition = this.elementTopPosition + this.elementHeight;
             return this;
         },
