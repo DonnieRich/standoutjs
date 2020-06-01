@@ -4,7 +4,7 @@
         let settings = $.extend({}, $.fn.standout.defaults, options);
         let obj = $(this);
         let id = obj.attr("id") + "_clone";
-        duplicateElement(obj, settings.overlay);
+        duplicateElement(obj, settings);
 
         $(window).on("resize scroll", function(){
             obj.each(function(){
@@ -12,10 +12,9 @@
                 objProps.init(obj).update(obj);
                 if(objProps.isInViewport()) {
                     if(objProps.isAtCenter()) {
-                        console.log("Element is at center");
                         $("#overlayStandout").css({
                             "display": "block",
-                            "opacity": objProps.percentage()
+                            "opacity": objProps.percentage() < 0.75 ? objProps.percentage() : 0.75
                         });
                         $("#"+id).css({
                             "display": "block",
@@ -43,6 +42,8 @@
     };
 
     $.fn.standout.defaults = {
+        waypoint: false,
+        waypointFunc: function(){},
         backgroundColor: "#000000",
         overlay: {
             backgroundColor: "#000000",
@@ -95,6 +96,7 @@
             this.viewportBottom = this.viewportTop + $(window).height();
             this.elementTopPosition = this.elementTop - this.viewportTop;
             this.elementBottomPosition = this.elementBottom - this.viewportTop;
+            return this;
         },
         init: function(el) {
             this.originalTop = el.offset().top;
@@ -105,10 +107,10 @@
 
     function duplicateElement(el, opt) {
         let html = getOuterHtml(el);
-        let overlay = $("<div />").css(opt).attr("id", "overlayStandout");
+        let overlay = $("<div />").css(opt.overlay).attr("id", "overlayStandout");
         $("body").append(overlay);
         $("body").append(html);
-        Waypoint.refreshAll();
+        if(opt.waypoint){opt.waypointFunc()};
     }
 
     function getOuterHtml(el) {
