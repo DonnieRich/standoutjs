@@ -11,28 +11,45 @@
                 let objProps = $.fn.standout.data;
                 objProps.init(obj).update(obj);
                 if(objProps.isInViewport()) {
-                    if(objProps.isAtCenter()) {
-                        $("#overlayStandout").css({
-                            "display": "block",
-                            "opacity": objProps.percentage() < 0.75 ? objProps.percentage() : 0.75
-                        });
-                        $("#"+id).css({
-                            "display": "block",
-                            "position": "absolute",
-                            "top": objProps.originalTop,
-                            "left": objProps.originalLeft,
-                            "z-index": "10000",
-                            "width": objProps.elementWidth,
-                            "height": objProps.elementHeight,
-                            "opacity": objProps.percentage()
-                        });
-                    } else {
-                        $("#overlayStandout").css({
-                            "display": "none"
-                        });
-                        $("#"+id).css({
-                            "display": "none"
-                        });
+                    switch(objProps.status(settings)) {
+                        case "E":
+                            $("#overlayStandout").css({
+                                "display": "block",
+                                "opacity": objProps.percentage() < 0.75 ? objProps.percentage() : 0.75
+                            });
+                            $("#"+id).css({
+                                "display": "block",
+                                "position": "absolute",
+                                "top": objProps.originalTop,
+                                "left": objProps.originalLeft,
+                                "z-index": "10000",
+                                "width": objProps.elementWidth,
+                                "height": objProps.elementHeight,
+                                "opacity": objProps.percentage()
+                            });
+                            break;
+                        case "C":
+                            $("#overlayStandout").css({
+                                "display": "block",
+                                "opacity": 0.75
+                            });
+                            $("#"+id).css({
+                                "display": "block",
+                                "position": "absolute",
+                                "top": objProps.originalTop,
+                                "left": objProps.originalLeft,
+                                "z-index": "10000",
+                                "width": objProps.elementWidth,
+                                "height": objProps.elementHeight,
+                                "opacity": 1
+                            });
+                            break;
+                        case "O":
+                        case "U":
+                        default:
+                            $("#overlayStandout").fadeOut();
+                            $("#"+id).fadeOut();
+                            break;
                     }
                 }
             });
@@ -45,6 +62,8 @@
         waypoint: false,
         waypointFunc: function(){},
         backgroundColor: "#000000",
+        top: 0.3,
+        bottom: 0.6,
         overlay: {
             backgroundColor: "#000000",
             opacity: "0",
@@ -74,14 +93,22 @@
         isInViewport: function() {
             return this.elementBottom > this.viewportTop && this.elementTop < this.viewportBottom && this.initialized;
         },
-        isAtCenter: function() {
-            return this.elementTopPosition < (this.viewportHeight + this.elementHeight)/4 && this.elementBottomPosition > (this.viewportHeight + this.elementHeight)/4 && this.initialized;
+        status: function(opt) {
+            let status = "E";
+            if(this.elementTopPosition >= this.viewportHeight*opt.top && this.elementBottomPosition <= this.viewportHeight*opt.bottom) {
+                status = "C";
+            } else if(this.elementTopPosition < this.viewportHeight*opt.bottom && this.elementBottomPosition < this.viewportHeight*opt.top) {
+                status = "O";
+            } else if(this.elementTopPosition > this.viewportHeight*opt.bottom && this.elementBottomPosition > this.viewportHeight*opt.top) {
+                status = "U";
+            }
+            return status;
         },
         percentage: function() {
                 if(this.elementTopPosition+(this.elementHeight/2) <= this.viewportHeight/2) {
-                    opacity = 0 + (this.elementTopPosition+(this.elementHeight/2))/(this.viewportHeight/2);
+                    opacity = (this.elementTopPosition+(this.elementHeight/2))/(this.viewportTop/2);
                 } else {
-                    opacity = 1 + (1 - (this.elementTopPosition+(this.elementHeight/2))/(this.viewportHeight/2));
+                    opacity = (this.viewportTop/2)/(this.elementTopPosition-(this.elementHeight/2));
                 }
                 return opacity.toFixed(2);
         },
@@ -95,7 +122,7 @@
             this.viewportTop = $(window).scrollTop();
             this.viewportBottom = this.viewportTop + $(window).height();
             this.elementTopPosition = this.elementTop - this.viewportTop;
-            this.elementBottomPosition = this.elementBottom - this.viewportTop;
+            this.elementBottomPosition = this.elementTopPosition + this.elementHeight;
             return this;
         },
         init: function(el) {
