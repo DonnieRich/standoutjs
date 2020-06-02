@@ -27,25 +27,55 @@
                 height: 400px;
             }
 
-            .check-top {
-                display: block;
+            .alert-area {
+                max-height: 50vh;
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 30vh;
-                background-color: #000000;
-                opacity: 0.75;
+                top: 5px;
+                left: 20px;
+                right: 20px;
+                overflow-y: hidden;
+                z-index: 15000;
             }
-            .check-bottom {
-                display: block;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 40vh;
-                background-color: #000000;
-                opacity: 0.75;
+
+            #template .alert {
+                display: none;
+            }
+
+            .alert {
+                background-color: #50C878;
+                border: 1px solid #043927;
+                font-size: 16px;
+                color: white;
+                line-height: 1.3em;
+                padding: 10px 15px;
+                margin: 5px 10px;
+                position: relative;
+                border-radius: 5px;
+                transition: all 0.5s ease-in;
+                opacity: 0;
+                right: -100px;
+            }
+            .alert.show {
+                opacity: 1;
+                right: 10px;
+            }
+            .alert.hide {
+                opacity: 0;
+            }
+
+            @media (max-width: 767px) and (min-width: 481px) {
+                .alert-area {
+                    left: 100px;
+                    right: 100px;
+                }
+            }
+
+            @media (min-width: 768px) {
+                .alert-area {
+                    width: 350px;
+                    left: auto;
+                    right: 0;
+                }
             }
         </style>
     </head>
@@ -63,12 +93,13 @@
             <div class="box"></div>
             <div class="box"></div>
         </div>
-        <!-- <div class="check-top">
+        <div class="alert-area">
 
         </div>
-        <div class="check-bottom">
-
-        </div> -->
+        <div id="template">
+            <div class="alert">
+            </div>
+        </div>
 
 
         <script
@@ -79,8 +110,44 @@
 
         <script type="text/javascript">
             $(document).ready(function() {
-                $(".standout").standout();
+                $(".standout").standout({
+                    onlyFirstTime: true,
+                    showDemoLayout: true,
+                    enteringFromTop: function() {
+                        alert("ENTERING FROM TOP");
+                    },
+                    exitingFromTop: function() {
+                        alert("EXITING FROM TOP");
+                    },
+                    center: function() {
+                        alert("ELEMENT AT CENTER");
+                    },
+                    enteringFromBottom: function() {
+                        alert("ENTERING FROM BOTTOM");
+                    },
+                    exitingFromBottom: function() {
+                        alert("EXITING FROM BOTTOM");
+                    },
+                    over: function() {
+                        alert("ELEMENT OVER");
+                    },
+                    under: function() {
+                        alert("ELEMENT UNDER");
+                    }
+                });
             });
+            function alert(msg) {
+                let alert = $("#template").clone().find(".alert").append("<p>" + msg + "</p>");
+                let container = $(".alert-area");
+                container.append(alert);
+                alert.addClass("show");
+
+                let hide = setTimeout(function(){
+                    alert.addClass("hide");
+                    container.find(".alert:first").remove();
+                    clearTimeout(hide);
+                }, 2000);
+            }
         </script>
     </body>
 
