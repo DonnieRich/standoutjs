@@ -6,54 +6,44 @@
         let id = obj.attr("id") + "_clone";
         duplicateElement(obj, settings);
 
+        if(settings.showDemoLayout) {
+            demoLayout(settings);
+        }
+
         $(window).on("resize scroll", function(){
             obj.each(function(){
                 let objProps = $.fn.standout.data;
                 objProps.init(obj).update(obj, settings);
                 if(objProps.isInViewport()) {
-                    switch(objProps.status()) {
-                        case "EB":
-                        case "EXB":
-                        case "ET":
-                        case "EXT":
-                            $("#overlayStandout").css({
-                                "display": "block",
-                                "opacity": objProps.percentage() < 0.75 ? objProps.percentage() : 0.75
-                            });
-                            $("#"+id).css({
-                                "display": "block",
-                                "position": "absolute",
-                                "top": objProps.originalTop,
-                                "left": objProps.originalLeft,
-                                "z-index": "10000",
-                                "width": objProps.elementWidth,
-                                "height": objProps.elementHeight,
-                                "opacity": objProps.percentage() < 1 ? objProps.percentage() : 1
-                            });
-                            break;
-                        case "C":
-                            $("#overlayStandout").css({
-                                "display": "block",
-                                "opacity": 0.75
-                            });
-                            $("#"+id).css({
-                                "display": "block",
-                                "position": "absolute",
-                                "top": objProps.originalTop,
-                                "left": objProps.originalLeft,
-                                "z-index": "10000",
-                                "width": objProps.elementWidth,
-                                "height": objProps.elementHeight,
-                                "opacity": 1
-                            });
-                            break;
-                        case "O":
-                        case "U":
-                        default:
-                            $("#overlayStandout").fadeOut();
-                            $("#"+id).fadeOut();
-                            break;
-                    }
+                    let status = objProps.status();
+                    if((!settings.onlyFirstTime && status === objProps.lastEvent) || status != objProps.lastEvent) {
+                        switch(status) {
+                            case "EB":
+                                settings.enteringFromBottom();
+                                break;
+                            case "EXB":
+                                settings.exitingFromBottom();
+                                break;
+                            case "ET":
+                                settings.enteringFromTop();
+                                break;
+                            case "EXT":
+                                settings.exitingFromTop();
+                                break;
+                            case "C":
+                                settings.center();
+                                break;
+                            case "O":
+                                settings.over();
+                                break;
+                            case "U":
+                                settings.under();
+                                break;
+                            default:
+                                break;
+                        }
+                    }                    
+                    objProps.lastEvent = status;
                 }
             });
         });
@@ -62,17 +52,23 @@
     };
 
     $.fn.standout.defaults = {
-        // Change name of waypoint parameters to be more universal
-        waypoint: false,
-        waypointFunc: function(){},
-        entering: function(){},
+        // First two parameters allow the execution of code right after the element is cloned (ie. register waypoint event for the new content, etc...)
+        // You should insert here the original function that will be executed only once after the element is appended at the body
+        compatibility: false,
+        dynamicContentListeners: function(){},
+        enteringFromTop: function(){},
+        exitingFromTop: function(){},
         center: function(){},
-        exiting: function(){},
+        enteringFromBottom: function(){},
+        exitingFromBottom: function(){},
         under: function(){},
         over: function(){},
+        // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
+        onlyFirstTime: true,
+        showDemoLayout: false,
         backgroundColor: "#000000",
         top: 0.3,
-        bottom: 0.6,
+        bottom: 0.3,
         overlay: {
             backgroundColor: "#000000",
             opacity: "0",
@@ -83,6 +79,24 @@
             left: "0",
             zIndex: "9999",
             display: "none"
+        },
+        demoLayoutTop: {
+            backgroundColor: "#000000",
+            opacity: "0.75",
+            width: "100%",
+            position: "fixed",
+            top: "0",
+            left: "0",
+            zIndex: "9999"
+        },
+        demoLayoutBottom: {
+            backgroundColor: "#000000",
+            opacity: "0.75",
+            width: "100%",
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            zIndex: "9999"
         }
     };
 
@@ -102,6 +116,7 @@
         viewportTop: 0,
         viewportBottom: 0,
         lastViewportTop: 0,
+        lastEvent: "",
         isInViewport: function() {
             return this.elementBottom > this.viewportTop && this.elementTop < this.viewportBottom && this.initialized;
         },
@@ -126,6 +141,7 @@
                 status = "O";
             }
             this.lastViewportTop = this.viewportTop;
+            // this.lastEvent = status;
             return status;
         },
         percentage: function() {
@@ -147,7 +163,7 @@
             this.viewportTop = $(window).scrollTop();
             this.viewportBottom = this.viewportTop + $(window).height();
             this.viewportTopLimit = this.viewportHeight*opt.top;
-            this.viewportBottomLimit = this.viewportHeight - this.viewportHeight*opt.top;
+            this.viewportBottomLimit = this.viewportHeight - this.viewportHeight*opt.bottom;
             this.elementTopPosition = this.elementTop - this.viewportTop;
             this.elementCenterPosition = this.elementTopPosition + this.elementHeight/2;
             this.elementBottomPosition = this.elementTopPosition + this.elementHeight;
@@ -165,11 +181,18 @@
         let overlay = $("<div />").css(opt.overlay).attr("id", "overlayStandout");
         $("body").append(overlay);
         $("body").append(html);
-        if(opt.waypoint){opt.waypointFunc()};
+        if(opt.compatibility){opt.dynamicContentListeners()};
     }
 
     function getOuterHtml(el) {
         let id = el.attr("id") + "_clone";
         return $('<div />').append(el.eq(0).clone().css("display", "none").attr("id", id)).html();
+    }
+
+    function demoLayout(opt) {
+        let overlay = $("<div />").css(opt.demoLayoutTop).css("height", "calc(100vh*" + opt.top + ")").attr("id", "demoLayoutTop");
+        $("body").append(overlay);
+        overlay = $("<div />").css(opt.demoLayoutBottom).css("height", "calc(100vh*" + opt.bottom + ")").attr("id", "demoLayoutBottom");
+        $("body").append(overlay);
     }
 }(jQuery));
