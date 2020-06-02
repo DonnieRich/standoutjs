@@ -42,7 +42,7 @@
                             default:
                                 break;
                         }
-                    }                    
+                    }
                     objProps.lastEvent = status;
                 }
             });
@@ -141,7 +141,6 @@
                 status = "O";
             }
             this.lastViewportTop = this.viewportTop;
-            // this.lastEvent = status;
             return status;
         },
         percentage: function() {
