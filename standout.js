@@ -61,7 +61,8 @@
         enteringFromBottom: function(id,obj){obj.fading(id);},
         exitingFromBottom: function(id,obj){obj.fading(id);},
         under: function(id,obj){obj.hiding(id);},
-        over: function(id,obj){obj.hiding(id);}
+        over: function(id,obj){obj.hiding(id);},
+        onlyFirstTime: false
     }
 
     $.fn.standout.defaults = {
