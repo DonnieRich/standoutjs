@@ -1,10 +1,13 @@
 (function($){
     $.fn.standout = function(options){
         // This is the easiest way to have default options.
-        let settings = $.extend({}, $.fn.standout.defaults, options);
+        let settings = options.lightBoxEffect ? $.extend({}, $.fn.standout.defaults, options, $.fn.standout.defaultMethods) : $.extend({}, $.fn.standout.defaults, options);
         let obj = $(this);
         let id = obj.attr("id") + "_clone";
-        duplicateElement(obj, settings);
+
+        if(settings.lightBoxEffect) {
+            duplicateElement(obj, settings);
+        }
 
         if(settings.showDemoLayout) {
             demoLayout(settings);
@@ -19,25 +22,25 @@
                     if((!settings.onlyFirstTime && status === objProps.lastEvent) || status != objProps.lastEvent) {
                         switch(status) {
                             case "EB":
-                                settings.enteringFromBottom();
+                                settings.enteringFromBottom(id,objProps);
                                 break;
                             case "EXB":
-                                settings.exitingFromBottom();
+                                settings.exitingFromBottom(id,objProps);
                                 break;
                             case "ET":
-                                settings.enteringFromTop();
+                                settings.enteringFromTop(id,objProps);
                                 break;
                             case "EXT":
-                                settings.exitingFromTop();
+                                settings.exitingFromTop(id,objProps);
                                 break;
                             case "C":
-                                settings.center();
+                                settings.center(id,objProps);
                                 break;
                             case "O":
-                                settings.over();
+                                settings.over(id,objProps);
                                 break;
                             case "U":
-                                settings.under();
+                                settings.under(id,objProps);
                                 break;
                             default:
                                 break;
@@ -50,6 +53,16 @@
 
         return this;
     };
+
+    $.fn.standout.defaultMethods = {
+        enteringFromTop: function(id,obj){obj.fading(id);},
+        exitingFromTop: function(id,obj){obj.fading(id);},
+        center: function(id,obj){obj.showing(id);},
+        enteringFromBottom: function(id,obj){obj.fading(id);},
+        exitingFromBottom: function(id,obj){obj.fading(id);},
+        under: function(id,obj){obj.hiding(id);},
+        over: function(id,obj){obj.hiding(id);}
+    }
 
     $.fn.standout.defaults = {
         // First two parameters allow the execution of code right after the element is cloned (ie. register waypoint event for the new content, etc...)
@@ -66,6 +79,7 @@
         // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
         onlyFirstTime: true,
         showDemoLayout: false,
+        lightBoxEffect: false,
         backgroundColor: "#000000",
         top: 0.3,
         bottom: 0.3,
@@ -172,6 +186,42 @@
             this.originalTop = el.offset().top;
             this.originalLeft = el.offset().left;
             return this;
+        },
+        fading: function(id) {
+            $("#overlayStandout").css({
+                "display": "block",
+                "opacity": this.percentage() < 0.75 ? this.percentage() : 0.75
+            });
+            $("#"+id).css({
+                "display": "block",
+                "position": "absolute",
+                "top": this.originalTop,
+                "left": this.originalLeft,
+                "z-index": "10000",
+                "width": this.elementWidth,
+                "height": this.elementHeight,
+                "opacity": this.percentage() < 1 ? this.percentage() : 1
+            });
+        },
+        showing: function(id){
+            $("#overlayStandout").css({
+                "display": "block",
+                "opacity": 0.75
+            });
+            $("#"+id).css({
+                "display": "block",
+                "position": "absolute",
+                "top": this.originalTop,
+                "left": this.originalLeft,
+                "z-index": "10000",
+                "width": this.elementWidth,
+                "height": this.elementHeight,
+                "opacity": 1
+            });
+        },
+        hiding: function(id) {
+            $("#overlayStandout").fadeOut();
+            $("#"+id).fadeOut();
         }
     };
 
