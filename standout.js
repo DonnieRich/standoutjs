@@ -104,6 +104,16 @@
             left: "0",
             zIndex: "9999"
         },
+        demoLayoutCenter: {
+            backgroundColor: "#000000",
+            opacity: "0.75",
+            width: "100%",
+            position: "fixed",
+            left: "0",
+            zIndex: "9999",
+            height: "5px",
+            transform: "translateY(-50%)"
+        },
         demoLayoutBottom: {
             backgroundColor: "#000000",
             opacity: "0.75",
@@ -159,12 +169,24 @@
             return status;
         },
         percentage: function() {
-                if(this.elementCenterPosition <= this.viewportHeight/2) {
-                    opacity = (this.elementCenterPosition)/(this.viewportBottomLimit);
+            if(this.elementCenterPosition >= this.viewportCenterLimit) {
+                if(this.elementCenterPosition <= this.viewportBottomLimit) {
+                    opacity = 1;
                 } else {
-                    opacity = (this.viewportTopLimit)/(this.elementCenterPosition);
+                    let max = this.elementHeight/2;
+                    let current = Math.abs(this.viewportBottomLimit - this.elementCenterPosition);
+                    opacity = 1 - current/max;
                 }
-                return opacity.toFixed(2);
+            } else {
+                if(this.elementCenterPosition >= this.viewportTopLimit) {
+                    opacity = 1;
+                } else {
+                    let max = this.elementHeight/2;
+                    let current = Math.abs(this.viewportTopLimit - this.elementCenterPosition);
+                    opacity = 1 - current/max;
+                }
+            }
+            return opacity.toFixed(2);
         },
         update: function(el, opt) {
             this.initialized = true;
@@ -178,6 +200,7 @@
             this.viewportBottom = this.viewportTop + $(window).height();
             this.viewportTopLimit = this.viewportHeight*opt.top;
             this.viewportBottomLimit = this.viewportHeight - this.viewportHeight*opt.bottom;
+            this.viewportCenterLimit = this.viewportTopLimit + (this.viewportHeight * (1 - (opt.top + opt.bottom)) * 0.5);
             this.elementTopPosition = this.elementTop - this.viewportTop;
             this.elementCenterPosition = this.elementTopPosition + this.elementHeight/2;
             this.elementBottomPosition = this.elementTopPosition + this.elementHeight;
@@ -241,6 +264,8 @@
 
     function demoLayout(opt) {
         let overlay = $("<div />").css(opt.demoLayoutTop).css("height", "calc(100vh*" + opt.top + ")").attr("id", "demoLayoutTop");
+        $("body").append(overlay);
+        overlay = $("<div />").css(opt.demoLayoutCenter).css("top", "calc(100vh * " + opt.top + " + (100vh - (100vh * " + opt.top + " + 100vh * " + opt.bottom + "))/2)");
         $("body").append(overlay);
         overlay = $("<div />").css(opt.demoLayoutBottom).css("height", "calc(100vh*" + opt.bottom + ")").attr("id", "demoLayoutBottom");
         $("body").append(overlay);
