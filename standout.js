@@ -9,7 +9,8 @@
             demoLayout(settings);
         }
 
-        return this.each(function(){
+        return this.each(function(index){
+            // TODO: Find a way to check if next or prev element is going to enter the zone
             let obj = $(this);
             let id = "standout_clone_" + i;
             obj.objProps = $.extend({}, $.fn.standout.data);
@@ -27,13 +28,13 @@
                                 settings.enteringFromBottom(obj);
                                 break;
                             case "EXB":
-                                settings.exitingFromBottom(obj);
+                                settings.exitingFromBottom(obj, nxtObj);
                                 break;
                             case "ET":
                                 settings.enteringFromTop(obj);
                                 break;
                             case "EXT":
-                                settings.exitingFromTop(obj);
+                                settings.exitingFromTop(obj, nxtObj);
                                 break;
                             case "C":
                                 settings.center(obj);
@@ -56,10 +57,10 @@
 
     $.fn.standout.defaultMethods = {
         enteringFromTop: function(obj){return obj.objProps.fading(obj);},
-        exitingFromTop: function(obj){return obj.objProps.fading(obj);},
+        exitingFromTop: function(obj, nxtObj){return obj.objProps.fading(obj, nxtObj);},
         center: function(obj){return obj.objProps.showing(obj);},
         enteringFromBottom: function(obj){return obj.objProps.fading(obj);},
-        exitingFromBottom: function(obj){return obj.objProps.fading(obj);},
+        exitingFromBottom: function(obj, nxtObj){return obj.objProps.fading(obj, nxtObj);},
         under: function(obj){obj.objProps.fading(obj);},
         over: function(obj){obj.objProps.fading(obj);},
         onlyFirstTime: false
@@ -212,10 +213,18 @@
             this.originalLeft = el.offset().left;
             return this;
         },
-        fading: function(obj) {
+        fading: function(obj, nxtObj) {
+            let overlayPercentage = 0;
+
+            if(nxtObj.hasOwnProperty("objProps")) {
+                overlayPercentage = nxtObj.objProps.percentage();
+            } else {
+                overlayPercentage = this.percentage();
+            }
+
             $("#overlayStandout").css({
                 "display": "block",
-                "opacity": this.percentage() < 0.75 ? this.percentage() : 0.75
+                "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
             });
             $("."+obj.customId).css({
                 "display": "block",
@@ -232,7 +241,7 @@
         showing: function(obj){
             $("#overlayStandout").css({
                 "display": "block",
-                "opacity": 0.75
+                "opacity": this.percentage() > 0.75 ? 0.75 : this.percentage()
             });
             $("."+obj.customId).css({
                 "display": "block",
@@ -242,7 +251,7 @@
                 "z-index": "10000",
                 "width": this.elementWidth,
                 "height": this.elementHeight,
-                "opacity": 1
+                "opacity": this.percentage() > 1 ? 1 : this.percentage()
             });
             return obj;
         },
