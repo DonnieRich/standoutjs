@@ -114,7 +114,10 @@
             <div class="box"></div>
             <div class="box"></div>
             <div class="box"></div>
-            <div class="box standout"></div>
+            <div class="box standout">ZERO</div>
+            <div class="box"></div>
+            <div class="box"></div>
+            <div class="box standout">ONE</div>
             <div class="box"></div>
             <div class="box"></div>
             <div class="box"></div>
@@ -130,10 +133,7 @@
             <div class="box"></div>
             <div class="box"></div>
             <div class="box"></div>
-            <div class="box"></div>
-            <div class="box"></div>
-            <div class="box"></div>
-            <div class="box"></div>
+            <div class="box "></div>
             <div class="box"></div>
             <div class="box"></div>
             <div class="box"></div>
@@ -162,26 +162,26 @@
                     lightBoxEffect: true,
                     top: 0.7,
                     bottom: 0.1,
-                    enteringFromTop: function() {
-                        alert("ENTERING FROM TOP");
+                    enteringFromTop: function(obj) {
+                        alert("ENTERING FROM TOP " + obj.customId);
                     },
-                    exitingFromTop: function() {
-                        alert("EXITING FROM TOP");
+                    exitingFromTop: function(obj) {
+                        alert("EXITING FROM TOP " + obj.customId);
                     },
-                    center: function() {
-                        alert("ELEMENT AT CENTER");
+                    center: function(obj) {
+                        alert("ELEMENT AT CENTER " + obj.customId);
                     },
-                    enteringFromBottom: function() {
-                        alert("ENTERING FROM BOTTOM");
+                    enteringFromBottom: function(obj) {
+                        alert("ENTERING FROM BOTTOM " + obj.customId);
                     },
-                    exitingFromBottom: function() {
-                        alert("EXITING FROM BOTTOM");
+                    exitingFromBottom: function(obj) {
+                        alert("EXITING FROM BOTTOM " + obj.customId);
                     },
-                    over: function() {
-                        alert("ELEMENT OVER");
+                    over: function(obj) {
+                        alert("ELEMENT OVER " + obj.customId);
                     },
-                    under: function() {
-                        alert("ELEMENT UNDER");
+                    under: function(obj) {
+                        alert("ELEMENT UNDER " + obj.customId);
                     }
                 });
             });
