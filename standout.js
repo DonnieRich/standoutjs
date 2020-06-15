@@ -2,48 +2,69 @@
     $.fn.standout = function(options){
         // This is the easiest way to have default options.
         let settings = options.lightBoxEffect ? $.extend({}, $.fn.standout.defaults, options, $.fn.standout.defaultMethods) : $.extend({}, $.fn.standout.defaults, options);
-        let i = 0;
         let init = false;
 
         if(settings.showDemoLayout) {
             demoLayout(settings);
         }
 
-        return this.each(function(index){
+        let containers = this;
+
+        return containers.each(function(i){
+            console.log($(containers[i]));
             // TODO: Find a way to check if next or prev element is going to enter the zone
             let obj = $(this);
             let id = "standout_clone_" + i;
             obj.objProps = $.extend({}, $.fn.standout.data);
             obj.customId = id;
             init = initialize(obj, settings, i, init);
-            i++;
+
+            let prvObj = {};
+            if(i-1 >= 0) {
+                prvObj = $(containers[i-1]);
+                prvObj.objProps = $.extend({}, $.fn.standout.data);
+                prvObj.customId = "standout_clone_" + (i-1);
+            }
+
+            let nxtObj = {};
+            if(i+1 < containers.length) {
+                nxtObj = $(containers[i+1]);
+                nxtObj.objProps = $.extend({}, $.fn.standout.data);
+                nxtObj.customId = "standout_clone_" + (i+1);
+            }
 
             $(window).on("resize scroll", function(){
                 obj.objProps.init(obj).update(obj, settings);
+
+                if(prvObj.hasOwnProperty("objProps"))
+                    prvObj.objProps.init(prvObj).update(prvObj, settings);
+                if(nxtObj.hasOwnProperty("objProps"))
+                    nxtObj.objProps.init(nxtObj).update(nxtObj, settings);
+
                 if(obj.objProps.isInViewport()) {
                     obj.objProps.currentEvent = obj.objProps.status();
                     if((!settings.onlyFirstTime && obj.objProps.currentEvent === obj.objProps.lastEvent) || obj.objProps.currentEvent != obj.objProps.lastEvent) {
                         switch(obj.objProps.currentEvent) {
                             case "EB":
-                                settings.enteringFromBottom(obj);
+                                settings.enteringFromBottom(obj, nxtObj, prvObj);
                                 break;
                             case "EXB":
-                                settings.exitingFromBottom(obj, nxtObj);
+                                settings.exitingFromBottom(obj, nxtObj, prvObj);
                                 break;
                             case "ET":
-                                settings.enteringFromTop(obj);
+                                settings.enteringFromTop(obj, nxtObj, prvObj);
                                 break;
                             case "EXT":
-                                settings.exitingFromTop(obj, nxtObj);
+                                settings.exitingFromTop(obj, nxtObj, prvObj);
                                 break;
                             case "C":
                                 settings.center(obj);
                                 break;
                             case "O":
-                                settings.over(obj);
+                                settings.over(obj, nxtObj, prvObj);
                                 break;
                             case "U":
-                                settings.under(obj);
+                                settings.under(obj, nxtObj, prvObj);
                                 break;
                             default:
                                 break;
@@ -56,13 +77,13 @@
     };
 
     $.fn.standout.defaultMethods = {
-        enteringFromTop: function(obj){return obj.objProps.fading(obj);},
-        exitingFromTop: function(obj, nxtObj){return obj.objProps.fading(obj, nxtObj);},
+        enteringFromTop: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
+        exitingFromTop: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
         center: function(obj){return obj.objProps.showing(obj);},
-        enteringFromBottom: function(obj){return obj.objProps.fading(obj);},
-        exitingFromBottom: function(obj, nxtObj){return obj.objProps.fading(obj, nxtObj);},
-        under: function(obj){obj.objProps.fading(obj);},
-        over: function(obj){obj.objProps.fading(obj);},
+        enteringFromBottom: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
+        exitingFromBottom: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
+        under: function(obj, nxtObj, prvObj){obj.objProps.fading(obj, nxtObj, prvObj);},
+        over: function(obj, nxtObj, prvObj){obj.objProps.fading(obj, nxtObj, prvObj);},
         onlyFirstTime: false
     }
 
@@ -213,14 +234,8 @@
             this.originalLeft = el.offset().left;
             return this;
         },
-        fading: function(obj, nxtObj) {
-            let overlayPercentage = 0;
-
-            if(nxtObj.hasOwnProperty("objProps")) {
-                overlayPercentage = nxtObj.objProps.percentage();
-            } else {
-                overlayPercentage = this.percentage();
-            }
+        fading: function(obj, nxtObj, prvObj) {
+            let overlayPercentage = this.getCorrectOverlayPercentage(obj, nxtObj, prvObj);
 
             $("#overlayStandout").css({
                 "display": "block",
@@ -238,7 +253,7 @@
             });
             return obj;
         },
-        showing: function(obj){
+        showing: function(obj) {
             $("#overlayStandout").css({
                 "display": "block",
                 "opacity": this.percentage() > 0.75 ? 0.75 : this.percentage()
@@ -257,6 +272,18 @@
         },
         hiding: function(obj) {
             return obj;
+        },
+        getCorrectOverlayPercentage: function(obj, nxtObj, prvObj){
+            let overlayPercentage = 0;
+
+            if(nxtObj.hasOwnProperty("objProps")) {
+                overlayPercentage = nxtObj.objProps.percentage();
+            } else if(prvObj.hasOwnProperty("objProps")) {
+                overlayPercentage = prvObj.objProps.percentage();
+            } else {
+                overlayPercentage = this.percentage();
+            }
+            return overlayPercentage;
         }
     };
 
