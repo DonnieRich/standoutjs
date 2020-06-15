@@ -1,35 +1,36 @@
-(function($){
+;
+(function($, window, document, undefined){
+    'use strict';
+
     $.fn.standout = function(options){
         // This is the easiest way to have default options.
-        let settings = options.lightBoxEffect ? $.extend({}, $.fn.standout.defaults, options, $.fn.standout.defaultMethods) : $.extend({}, $.fn.standout.defaults, options);
+        let settings = options.lightBoxEffect ? $.extend({}, defaults, options, lightboxMethods) : $.extend({}, defaults, options);
         let init = false;
+        let containers = this;
 
         if(settings.showDemoLayout) {
             demoLayout(settings);
         }
 
-        let containers = this;
-
         return containers.each(function(i){
-            let obj = $(this);
+            // let obj = $(this);
             let id = "standout_clone_" + i;
-            obj.objProps = $.extend({}, $.fn.standout.data);
-            obj.customId = id;
+            let obj = initObj(containers, objProps, id, i);
             init = initialize(obj, settings, i, init);
 
-            let prvObj = {};
-            if(i-1 >= 0) {
-                prvObj = $(containers[i-1]);
-                prvObj.objProps = $.extend({}, $.fn.standout.data);
-                prvObj.customId = "standout_clone_" + (i-1);
-            }
+            let prvObj = initObj(containers, objProps, id, i-1);
+            // if(i-1 >= 0) {
+            //     prvObj = $(containers[i-1]);
+            //     prvObj.objProps = $.extend({}, objProps);
+            //     prvObj.customId = "standout_clone_" + (i-1);
+            // }
 
-            let nxtObj = {};
-            if(i+1 < containers.length) {
-                nxtObj = $(containers[i+1]);
-                nxtObj.objProps = $.extend({}, $.fn.standout.data);
-                nxtObj.customId = "standout_clone_" + (i+1);
-            }
+            let nxtObj = initObj(containers, objProps, id, i+1);
+            // if(i+1 < containers.length) {
+            //     nxtObj = $(containers[i+1]);
+            //     nxtObj.objProps = $.extend({}, objProps);
+            //     nxtObj.customId = "standout_clone_" + (i+1);
+            // }
 
             $(window).on("resize scroll", function(){
                 obj.objProps.init(obj).update(obj, settings);
@@ -74,7 +75,7 @@
         });
     };
 
-    $.fn.standout.defaultMethods = {
+    let lightboxMethods = {
         enteringFromTop: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
         exitingFromTop: function(obj, nxtObj, prvObj){return obj.objProps.fading(obj, nxtObj, prvObj);},
         center: function(obj){return obj.objProps.showing(obj);},
@@ -85,7 +86,7 @@
         onlyFirstTime: false
     }
 
-    $.fn.standout.defaults = {
+    let defaults = {
         // First two parameters allow the execution of code right after the element is cloned (ie. register waypoint event for the new content, etc...)
         // You should insert here the original function that will be executed only once after the element is appended at the body
         compatibility: false,
@@ -145,7 +146,7 @@
         }
     };
 
-    $.fn.standout.data = {
+    let objProps = {
         initialized: false,
         originalTop: 0,
         originalLeft: 0,
@@ -190,6 +191,7 @@
             return status;
         },
         percentage: function() {
+            let opacity = 0;
             if(this.elementCenterPosition >= this.viewportCenterLimit) {
                 if(this.elementCenterPosition <= this.viewportBottomLimit) {
                     opacity = 1;
@@ -274,14 +276,18 @@
         },
         getCorrectOverlayPercentage: function(obj, nxtObj, prvObj){
             // Take the max value between current, next and prev elements in viewport
-            let c = nxt = prev = 0;
+            let c, nxt, prev;
+            c = nxt = prev = 0;
+
             c = this.percentage();
             if(nxtObj.hasOwnProperty("objProps")) {
                 nxt = nxtObj.objProps.percentage();
             }
+
             if(prvObj.hasOwnProperty("objProps")) {
                 prev = prvObj.objProps.percentage();
             }
+
             return Math.max(c, nxt, prev);
         }
     };
@@ -295,6 +301,16 @@
             duplicateElement(obj, settings, i);
         }
         return init;
+    }
+
+    function initObj(objs, objProps, id, i) {
+        let obj = {};
+        if (typeof objs[i] !== 'undefined') {
+            obj = $(objs[i]);
+            obj.objProps = $.extend({}, objProps);
+            obj.customId = id;
+        }
+        return obj;
     }
 
     function overlayElement(opt) {
@@ -321,4 +337,4 @@
         overlay = $("<div />").css(opt.demoLayoutBottom).css("height", "calc(100vh*" + opt.bottom + ")").attr("id", "demoLayoutBottom");
         $("body").append(overlay);
     }
-}(jQuery));
+}(jQuery, window, document));
