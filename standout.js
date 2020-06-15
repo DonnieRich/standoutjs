@@ -27,37 +27,14 @@
 
                 if(prvObj.hasOwnProperty("objProps"))
                     prvObj.objProps.init(prvObj).update(prvObj, settings);
+                    
                 if(nxtObj.hasOwnProperty("objProps"))
                     nxtObj.objProps.init(nxtObj).update(nxtObj, settings);
 
                 if(obj.objProps.isInViewport()) {
                     obj.objProps.currentEvent = obj.objProps.status();
                     if((!settings.onlyFirstTime && obj.objProps.currentEvent === obj.objProps.lastEvent) || obj.objProps.currentEvent != obj.objProps.lastEvent) {
-                        switch(obj.objProps.currentEvent) {
-                            case "EB":
-                                settings.enteringFromBottom(obj, nxtObj, prvObj);
-                                break;
-                            case "EXB":
-                                settings.exitingFromBottom(obj, nxtObj, prvObj);
-                                break;
-                            case "ET":
-                                settings.enteringFromTop(obj, nxtObj, prvObj);
-                                break;
-                            case "EXT":
-                                settings.exitingFromTop(obj, nxtObj, prvObj);
-                                break;
-                            case "C":
-                                settings.center(obj);
-                                break;
-                            case "O":
-                                settings.over(obj, nxtObj, prvObj);
-                                break;
-                            case "U":
-                                settings.under(obj, nxtObj, prvObj);
-                                break;
-                            default:
-                                break;
-                        }
+                        fireEvent(settings, obj, nxtObj, prvObj);
                     }
                     obj.objProps.lastEvent = obj.objProps.currentEvent;
                 }
@@ -301,6 +278,34 @@
             obj.customId = id;
         }
         return obj;
+    }
+
+    function fireEvent(settings, obj, nxtObj, prvObj) {
+        switch(obj.objProps.currentEvent) {
+            case "EB":
+                settings.enteringFromBottom(obj, nxtObj, prvObj);
+                break;
+            case "EXB":
+                settings.exitingFromBottom(obj, nxtObj, prvObj);
+                break;
+            case "ET":
+                settings.enteringFromTop(obj, nxtObj, prvObj);
+                break;
+            case "EXT":
+                settings.exitingFromTop(obj, nxtObj, prvObj);
+                break;
+            case "C":
+                settings.center(obj);
+                break;
+            case "O":
+                settings.over(obj, nxtObj, prvObj);
+                break;
+            case "U":
+                settings.under(obj, nxtObj, prvObj);
+                break;
+            default:
+                break;
+        }
     }
 
     function overlayElement(opt) {
