@@ -11,8 +11,6 @@
         let containers = this;
 
         return containers.each(function(i){
-            console.log($(containers[i]));
-            // TODO: Find a way to check if next or prev element is going to enter the zone
             let obj = $(this);
             let id = "standout_clone_" + i;
             obj.objProps = $.extend({}, $.fn.standout.data);
