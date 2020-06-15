@@ -19,18 +19,8 @@
             init = initialize(obj, settings, i, init);
 
             let prvObj = initObj(containers, objProps, id, i-1);
-            // if(i-1 >= 0) {
-            //     prvObj = $(containers[i-1]);
-            //     prvObj.objProps = $.extend({}, objProps);
-            //     prvObj.customId = "standout_clone_" + (i-1);
-            // }
-
             let nxtObj = initObj(containers, objProps, id, i+1);
-            // if(i+1 < containers.length) {
-            //     nxtObj = $(containers[i+1]);
-            //     nxtObj.objProps = $.extend({}, objProps);
-            //     nxtObj.customId = "standout_clone_" + (i+1);
-            // }
+
 
             $(window).on("resize scroll", function(){
                 obj.objProps.init(obj).update(obj, settings);
