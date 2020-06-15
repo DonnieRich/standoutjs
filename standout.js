@@ -249,6 +249,7 @@
                 "z-index": "10000",
                 "width": this.elementWidth,
                 "height": this.elementHeight,
+                "margin": "0",
                 "opacity": this.percentage() < 1 ? this.percentage() : 1
             });
             return obj;
@@ -274,16 +275,16 @@
             return obj;
         },
         getCorrectOverlayPercentage: function(obj, nxtObj, prvObj){
-            let overlayPercentage = 0;
-
+            // Take the max value between current, next and prev elements in viewport
+            let c = nxt = prev = 0;
+            c = this.percentage();
             if(nxtObj.hasOwnProperty("objProps")) {
-                overlayPercentage = nxtObj.objProps.percentage();
-            } else if(prvObj.hasOwnProperty("objProps")) {
-                overlayPercentage = prvObj.objProps.percentage();
-            } else {
-                overlayPercentage = this.percentage();
+                nxt = nxtObj.objProps.percentage();
             }
-            return overlayPercentage;
+            if(prvObj.hasOwnProperty("objProps")) {
+                prev = prvObj.objProps.percentage();
+            }
+            return Math.max(c, nxt, prev);
         }
     };
 
