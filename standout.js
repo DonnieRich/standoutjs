@@ -2,6 +2,105 @@
 (function($, window, document, undefined){
     'use strict';
 
+    const pluginName = "standout";
+    let standoutIndex = 0;
+    let allStandout = {};
+
+    function Standout(elements, i, options) {
+        this.idx = 'standout_' + standoutIndex;
+        this.options = Standout.options();
+        this.element = Standout.getElement(elements, i);
+        this.enabled = this.options.enabled;
+        allStandout[this.idx] = this;
+        standoutIndex++;
+    }
+
+    /* Private */
+    Standout.prototype.init = function() {
+        
+    }
+
+    /* Private */
+    Standout.prototype.options = function(options) {
+        return options.lightBoxEffect ? $.extend({}, defaults, options, lightboxMethods) : $.extend({}, defaults, options);
+    }
+
+    /* Private */
+    Standout.prototype.getElement = function(containers, i) {
+        let obj = {};
+        if (typeof objs[i] !== 'undefined' && i > -1) {
+            obj = $(objs[i]);
+        }
+        return obj;
+    }
+
+    /* Private */
+    Standout.prototype.getNextElement = function(containers, i) {
+        return Standout.getElement(containers, i + 1);
+    }
+
+    /* Private */
+    Standout.prototype.getPrevElement = function(containers, i) {
+        return Standout.getElement(containers, i - 1);
+    }
+
+    /* Private */
+    Standout.defaults = {
+        // First two parameters allow the execution of code right after the element is cloned (ie. register waypoint event for the new content, etc...)
+        // You should insert here the original function that will be executed only once after the element is appended at the body
+        compatibility: false,
+        dynamicContentListeners: function(){},
+        enteringFromTop: function(){},
+        exitingFromTop: function(){},
+        center: function(){},
+        enteringFromBottom: function(){},
+        exitingFromBottom: function(){},
+        under: function(){},
+        over: function(){},
+        // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
+        onlyFirstTime: true,
+        showDemoLayout: false,
+        lightBoxEffect: false,
+        backgroundColor: "#000000",
+        top: 0.3,
+        bottom: 0.3,
+        overlay: {
+            backgroundColor: "#000000",
+            opacity: "0",
+            width: "100%",
+            height: "100%",
+            position: "fixed",
+            top: "0",
+            left: "0",
+            zIndex: "9999",
+            display: "none"
+        },
+        enabled: true
+    }
+
+    $.fn[pluginName] = function(options) {
+        if (options === undefined || typeof options === 'object') {
+            let allElements = this;
+            return this.each(function(i){
+                // Only allow the plugin to be instantiated once,
+                // so we check that the element has no plugin instantiation yet
+                if (!$.data(this, 'plugin_' + pluginName)) {
+
+                    // if it has no instance, create a new one,
+                    // pass options to our plugin constructor,
+                    // and store the plugin instance
+                    // in the elements jQuery data object.
+                    $.data(this, 'plugin_' + pluginName, new Standout( allElements, i, options ));
+                    if(options.showDemoLayout) {
+                        demoLayout(settings);
+                    }
+                }
+            });
+        } else {
+            console.log("No public methods availables");
+        }
+    }
+
     $.fn.standout = function(options){
         // This is the easiest way to have default options.
         let settings = options.lightBoxEffect ? $.extend({}, defaults, options, lightboxMethods) : $.extend({}, defaults, options);
@@ -13,7 +112,6 @@
         }
 
         return containers.each(function(i){
-            // let obj = $(this);
             let id = "standout_clone_" + i;
             let obj = initObj(containers, objProps, id, i);
             init = initialize(obj, settings, i, init);
@@ -27,7 +125,7 @@
 
                 if(prvObj.hasOwnProperty("objProps"))
                     prvObj.objProps.init(prvObj).update(prvObj, settings);
-                    
+
                 if(nxtObj.hasOwnProperty("objProps"))
                     nxtObj.objProps.init(nxtObj).update(nxtObj, settings);
 
