@@ -159,30 +159,29 @@
                 $(".standout").standout({
                     onlyFirstTime: true,
                     showDemoLayout: true,
-                    lightBoxEffect: false,
+                    lightBoxEffect: true,
                     top: 0.7,
                     bottom: 0.1,
                     enteringFromTop: function(obj) {
-                        alert("ENTERING FROM TOP " + obj.customId);
+                        alert("ENTERING FROM TOP " + obj.idx);
                     },
                     exitingFromTop: function(obj) {
-                        alert("EXITING FROM TOP " + obj.customId);
+                        alert("EXITING FROM TOP " + obj.idx);
                     },
                     center: function(obj) {
-                        alert("ELEMENT AT CENTER " + obj.customId);
+                        alert("ELEMENT AT CENTER " + obj.idx);
                     },
                     enteringFromBottom: function(obj) {
-                        console.log(this);
-                        alert("ENTERING FROM BOTTOM " + obj.customId);
+                        alert("ENTERING FROM BOTTOM " + obj.idx);
                     },
                     exitingFromBottom: function(obj) {
-                        alert("EXITING FROM BOTTOM " + obj.customId);
+                        alert("EXITING FROM BOTTOM " + obj.idx);
                     },
                     over: function(obj) {
-                        alert("ELEMENT OVER " + obj.customId);
+                        alert("ELEMENT OVER " + obj.idx);
                     },
                     under: function(obj) {
-                        alert("ELEMENT UNDER " + obj.customId);
+                        alert("ELEMENT UNDER " + obj.idx);
                     }
                 });
             });
