@@ -244,27 +244,30 @@
         },
         percentage: function() {
             let opacity = 0;
-            if(this.elementCenterPosition >= this.viewportCenterLimit) {
-                if(this.elementCenterPosition <= this.viewportBottomLimit) {
+            let status = this.currentEvent;
+
+            switch(status) {
+                case "C":
                     opacity = 1;
-                } else {
-                    opacity = this.getOpacity();
-                }
-            } else {
-                if(this.elementCenterPosition >= this.viewportTopLimit) {
-                    opacity = 1;
-                } else {
-                    opacity = this.getOpacity();
-                }
+                    break;
+                case "EB":
+                case "EXB":
+                    opacity = this.getOpacity(this.viewportBottomLimit);
+                    break;
+                case "ET":
+                case "EXT":
+                    opacity = this.getOpacity(this.viewportTopLimit);
+                    break;
+                default:
+                    break;
             }
+
             return opacity.toFixed(2);
         },
-        getOpacity: function() {
-            // TODO: fix opacity calculations to be relative to closeness to center
+        getOpacity: function(limit) {
             let max = this.elementHeight/2;
-            let current = Math.abs(this.viewportTopLimit - this.elementCenterPosition);
-            let opacity = 1 / (current/max);
-            console.log(opacity);
+            let current = Math.abs(limit - this.elementCenterPosition);
+            let opacity = (max - current) / max;
             return opacity;
         },
         update: function(el, opt) {
@@ -293,7 +296,7 @@
         },
         fading: function(obj, nxtObj, prvObj) {
             let overlayPercentage = this.getCorrectOverlayPercentage(nxtObj, prvObj);
-            console.log(overlayPercentage);
+            console.log("overlayPercentage", overlayPercentage);
             $("#overlayStandout").css({
                 "display": "block",
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
@@ -340,7 +343,7 @@
 
             c = this.percentage();
             if(typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
-                console.log("NNNN");
+                // console.log("NNNN");
                 nxt = nxtObj.$element.objProps.percentage();
             }
 
