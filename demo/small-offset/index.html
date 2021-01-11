@@ -159,10 +159,11 @@
                 $(".standout").standout({
                     onlyFirstTime: true,
                     showDemoLayout: true,
-                    lightBoxEffect: true,
+                    lightBoxEffect: false,
                     top: 0.7,
                     bottom: 0.1,
                     enteringFromTop: function(obj) {
+                        console.log(this);
                         alert("ENTERING FROM TOP " + obj.idx);
                     },
                     exitingFromTop: function(obj) {

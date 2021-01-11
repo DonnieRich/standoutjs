@@ -111,29 +111,30 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 $(".standout").standout({
-                    onlyFirstTime: true,
-                    showDemoLayout: true,
-                    enteringFromTop: function() {
-                        alert("ENTERING FROM TOP");
-                    },
-                    exitingFromTop: function() {
-                        alert("EXITING FROM TOP");
-                    },
-                    center: function() {
-                        alert("ELEMENT AT CENTER");
-                    },
-                    enteringFromBottom: function() {
-                        alert("ENTERING FROM BOTTOM");
-                    },
-                    exitingFromBottom: function() {
-                        alert("EXITING FROM BOTTOM");
-                    },
-                    over: function() {
-                        alert("ELEMENT OVER");
-                    },
-                    under: function() {
-                        alert("ELEMENT UNDER");
-                    }
+                    onlyFirstTime: false,
+                    showDemoLayout: false,
+                    lightBoxEffect: true
+                    // enteringFromTop: function() {
+                    //     alert("ENTERING FROM TOP");
+                    // },
+                    // exitingFromTop: function() {
+                    //     alert("EXITING FROM TOP");
+                    // },
+                    // center: function() {
+                    //     alert("ELEMENT AT CENTER");
+                    // },
+                    // enteringFromBottom: function() {
+                    //     alert("ENTERING FROM BOTTOM");
+                    // },
+                    // exitingFromBottom: function() {
+                    //     alert("EXITING FROM BOTTOM");
+                    // },
+                    // over: function() {
+                    //     alert("ELEMENT OVER");
+                    // },
+                    // under: function() {
+                    //     alert("ELEMENT UNDER");
+                    // }
                 });
             });
             function alert(msg) {

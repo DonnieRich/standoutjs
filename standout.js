@@ -219,6 +219,7 @@
             return this.elementBottom > this.viewportTop && this.elementTop < this.viewportBottom && this.initialized;
         },
         status: function() {
+            // TODO: can refactor this part merging ET with EXT and EB with EXB
             let status = "U";
             if(this.lastViewportTop === 0) {this.lastViewportTop = this.viewportTop;}
             if(this.elementCenterPosition >= this.viewportTopLimit && this.elementCenterPosition <= this.viewportBottomLimit) {
@@ -226,41 +227,45 @@
             }  else if (this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit &&
                 this.viewportTop < this.lastViewportTop) {
                     status = "ET";
-                } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
-                    this.viewportTop > this.lastViewportTop) {
-                        status = "EB";
-                    } else if(this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit &&
-                        this.viewportTop > this.lastViewportTop) {
-                            status = "EXT";
-                        } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
-                            this.viewportTop < this.lastViewportTop) {
-                                status = "EXB";
-                            } else if(this.elementBottomPosition < this.viewportTopLimit) {
-                                status = "O";
-                            }
-                            this.lastViewportTop = this.viewportTop;
-                            return status;
-                        },
+            } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
+                this.viewportTop > this.lastViewportTop) {
+                    status = "EB";
+            } else if(this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit &&
+                this.viewportTop > this.lastViewportTop) {
+                    status = "EXT";
+            } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
+                this.viewportTop < this.lastViewportTop) {
+                    status = "EXB";
+            } else if(this.elementBottomPosition < this.viewportTopLimit) {
+                status = "O";
+            }
+            this.lastViewportTop = this.viewportTop;
+            return status;
+        },
         percentage: function() {
             let opacity = 0;
             if(this.elementCenterPosition >= this.viewportCenterLimit) {
                 if(this.elementCenterPosition <= this.viewportBottomLimit) {
                     opacity = 1;
                 } else {
-                    let max = this.elementHeight/2;
-                    let current = Math.abs(this.viewportBottomLimit - this.elementCenterPosition);
-                    opacity = 1 - current/max;
+                    opacity = this.getOpacity();
                 }
             } else {
                 if(this.elementCenterPosition >= this.viewportTopLimit) {
                     opacity = 1;
                 } else {
-                    let max = this.elementHeight/2;
-                    let current = Math.abs(this.viewportTopLimit - this.elementCenterPosition);
-                    opacity = 1 - current/max;
+                    opacity = this.getOpacity();
                 }
             }
             return opacity.toFixed(2);
+        },
+        getOpacity: function() {
+            // TODO: fix opacity calculations to be relative to closeness to center
+            let max = this.elementHeight/2;
+            let current = Math.abs(this.viewportTopLimit - this.elementCenterPosition);
+            let opacity = 1 / (current/max);
+            console.log(opacity);
+            return opacity;
         },
         update: function(el, opt) {
             this.initialized = true;
@@ -288,6 +293,7 @@
         },
         fading: function(obj, nxtObj, prvObj) {
             let overlayPercentage = this.getCorrectOverlayPercentage(nxtObj, prvObj);
+            console.log(overlayPercentage);
             $("#overlayStandout").css({
                 "display": "block",
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
@@ -303,7 +309,7 @@
                 "margin": "0",
                 "opacity": this.percentage() < 1 ? this.percentage() : 1
             });
-            // console.log("IS FADING");
+            console.log("IS FADING");
             return this;
         },
         showing: function(obj) {
