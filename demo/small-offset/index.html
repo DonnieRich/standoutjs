@@ -163,7 +163,6 @@
                     top: 0.7,
                     bottom: 0.1,
                     enteringFromTop: function(obj) {
-                        console.log(this);
                         alert("ENTERING FROM TOP " + obj.idx);
                     },
                     exitingFromTop: function(obj) {
@@ -184,6 +183,8 @@
                     under: function(obj) {
                         alert("ELEMENT UNDER " + obj.idx);
                     }
+                }).on("EB", function(e) {
+                    console.log("EVENT", e);
                 });
             });
             function alert(msg) {

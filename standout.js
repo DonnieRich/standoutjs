@@ -16,7 +16,7 @@
         this.clonedId = this.idx + '_cloned';
         this.isLastElement = isLast;
         this.options = this.getOptions(options);
-        this.element = element; //Standout.getElement(elements, i);
+        this.element = element;
         this.enabled = this.options.enabled;
         allStandout[i] = this;
         this.init();
@@ -59,6 +59,36 @@
         let prev = this.getPrevElement(this.i);
         let nxt = this.getNextElement(this.i);
 
+        /* EVENTS */
+        
+        obj.$element.on("EB", function(){
+            obj.options.enteringFromBottom(obj, nxt, prev);
+        });
+
+        obj.$element.on("EXB", function(){
+            obj.options.exitingFromBottom(obj, nxt, prev);
+        });
+
+        obj.$element.on("ET", function(){
+            obj.options.enteringFromTop(obj, nxt, prev);
+        });
+
+        obj.$element.on("EXT", function(){
+            obj.options.exitingFromTop(obj, nxt, prev);
+        });
+
+        obj.$element.on("C", function(){
+            obj.options.center(obj, nxt, prev);
+        });
+
+        obj.$element.on("O", function(){
+            obj.options.over(obj, nxt, prev);
+        });
+
+        obj.$element.on("U", function(){
+            obj.options.under(obj, nxt, prev);
+        });
+
         $(window).on("resize scroll", function(){
             obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
 
@@ -73,7 +103,12 @@
             if(obj.$element.objProps.isInViewport()) {
                 obj.$element.objProps.currentEvent = obj.$element.objProps.status();
                 if((!obj.options.onlyFirstTime && obj.$element.objProps.currentEvent === obj.$element.objProps.lastEvent) || obj.$element.objProps.currentEvent != obj.$element.objProps.lastEvent) {
-                    Standout.fireEvent(obj, nxt, prev);
+                    obj.$element.trigger(obj.$element.objProps.currentEvent);
+                    
+                    // if(obj.options.lightBoxEffect) {
+                    //     Standout.fireEvent(obj, nxt, prev);
+                    // }
+
                 }
                 obj.$element.objProps.lastEvent = obj.$element.objProps.currentEvent;
             }
@@ -82,31 +117,32 @@
 
     /* Private */
     Standout.fireEvent = function(obj, nxtObj, prvObj){
-        switch(obj.$element.objProps.currentEvent) {
-            case "EB":
-                obj.options.enteringFromBottom(obj, nxtObj, prvObj);
-                break;
-            case "EXB":
-                obj.options.exitingFromBottom(obj, nxtObj, prvObj);
-                break;
-            case "ET":
-                obj.options.enteringFromTop(obj, nxtObj, prvObj);
-                break;
-            case "EXT":
-                obj.options.exitingFromTop(obj, nxtObj, prvObj);
-                break;
-            case "C":
-                obj.options.center(obj);
-                break;
-            case "O":
-                obj.options.over(obj, nxtObj, prvObj);
-                break;
-            case "U":
-                obj.options.under(obj, nxtObj, prvObj);
-                break;
-            default:
-                break;
-        }
+
+        // switch(obj.$element.objProps.currentEvent) {
+        //     case "EB":
+        //         obj.options.enteringFromBottom(obj, nxtObj, prvObj);
+        //         break;
+        //     case "EXB":
+        //         obj.options.exitingFromBottom(obj, nxtObj, prvObj);
+        //         break;
+        //     case "ET":
+        //         obj.options.enteringFromTop(obj, nxtObj, prvObj);
+        //         break;
+        //     case "EXT":
+        //         obj.options.exitingFromTop(obj, nxtObj, prvObj);
+        //         break;
+        //     case "C":
+        //         obj.options.center(obj);
+        //         break;
+        //     case "O":
+        //         obj.options.over(obj, nxtObj, prvObj);
+        //         break;
+        //     case "U":
+        //         obj.options.under(obj, nxtObj, prvObj);
+        //         break;
+        //     default:
+        //         break;
+        // }
     }
 
     /* Public */
