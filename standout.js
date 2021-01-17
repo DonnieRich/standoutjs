@@ -68,9 +68,12 @@
                 if((!obj.options.onlyFirstTime && obj.$element.objProps.currentEvent === obj.$element.objProps.lastEvent) || obj.$element.objProps.currentEvent != obj.$element.objProps.lastEvent) {
                     // triggering the event passing along the current object
                     obj.$element.trigger(obj.$element.objProps.currentEvent, [obj]);
-
                 }
                 obj.$element.objProps.lastEvent = obj.$element.objProps.currentEvent;
+            } else {
+                // Reset current event when element is not in viewport
+                obj.$element.objProps.currentEvent = "";
+                obj.$element.objProps.lastEvent = "";
             }
         });
     }
@@ -190,26 +193,32 @@
             return this.elementBottom > this.viewportTop && this.elementTop < this.viewportBottom && this.initialized;
         },
         status: function() {
-            // TODO: can refactor this part merging ET with EXT and EB with EXB
+            // TODO: test refactored code
             let status = "U";
             if(this.lastViewportTop === 0) {this.lastViewportTop = this.viewportTop;}
+
             if(this.elementCenterPosition >= this.viewportTopLimit && this.elementCenterPosition <= this.viewportBottomLimit) {
                 status = "C";
-            }  else if (this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit &&
-                this.viewportTop < this.lastViewportTop) {
-                    status = "ET";
-            } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
-                this.viewportTop > this.lastViewportTop) {
-                    status = "EB";
-            } else if(this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit &&
-                this.viewportTop > this.lastViewportTop) {
-                    status = "EXT";
-            } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit &&
-                this.viewportTop < this.lastViewportTop) {
-                    status = "EXB";
-            } else if(this.elementBottomPosition < this.viewportTopLimit) {
-                status = "O";
+            } else {
+                if(this.elementBottomPosition < this.viewportTopLimit) {
+                    status = "O";
+                } else {
+                    if (this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit) {
+                        if(this.viewportTop < this.lastViewportTop) {
+                            status = "ET";
+                        } else {
+                            status = "EXT";
+                        }
+                    } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit) {
+                        if(this.viewportTop > this.lastViewportTop) {
+                            status = "EB";
+                        } else {
+                            status = "EXB";
+                        }
+                    }
+                }
             }
+
             this.lastViewportTop = this.viewportTop;
             return status;
         },
@@ -267,7 +276,6 @@
         },
         fading: function(obj, nxtObj, prvObj) {
             let overlayPercentage = this.getCorrectOverlayPercentage(nxtObj, prvObj);
-            console.log("overlayPercentage", overlayPercentage);
             $("#overlayStandout").css({
                 "display": "block",
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
@@ -283,7 +291,6 @@
                 "margin": "0",
                 "opacity": this.percentage() < 1 ? this.percentage() : 1
             });
-            console.log("IS FADING");
             return this;
         },
         showing: function(obj) {
@@ -314,17 +321,12 @@
 
             c = this.percentage();
             if(typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
-                // console.log("NNNN");
                 nxt = nxtObj.$element.objProps.percentage();
             }
 
             if(typeof prvObj !== "undefined" && prvObj.$element.hasOwnProperty("objProps")) {
                 prev = prvObj.$element.objProps.percentage();
             }
-
-            // console.log("Current:" + c);
-            // console.log("Nxt:" + nxt);
-            // console.log("Prev:" + prev);
 
             return Math.max(c, nxt, prev);
         }
