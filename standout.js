@@ -24,6 +24,9 @@
 
     /* Private */
     Standout.prototype.init = function() {
+        
+        this.buildCache();
+        this.bindEvents();
 
         if(this.options.showDemoLayout && !demoInit) {
             demoInit = true;
@@ -42,10 +45,10 @@
             if(this.options.compatibility && this.isLastElement && typeof this.options.dynamicContentListeners === 'function'){
                 this.options.dynamicContentListeners();
             }
+
+            this.registerLightboxEvents();
         }
 
-        this.buildCache();
-        this.bindEvents();
     }
 
     /* Private */
@@ -56,58 +59,15 @@
     /* Private */
     Standout.prototype.bindEvents = function(){
         let obj = this;
-        let prev = this.getPrevElement(this.i);
-        let nxt = this.getNextElement(this.i);
-
-        /* EVENTS */
-        
-        obj.$element.on("EB", function(){
-            obj.options.enteringFromBottom(obj, nxt, prev);
-        });
-
-        obj.$element.on("EXB", function(){
-            obj.options.exitingFromBottom(obj, nxt, prev);
-        });
-
-        obj.$element.on("ET", function(){
-            obj.options.enteringFromTop(obj, nxt, prev);
-        });
-
-        obj.$element.on("EXT", function(){
-            obj.options.exitingFromTop(obj, nxt, prev);
-        });
-
-        obj.$element.on("C", function(){
-            obj.options.center(obj, nxt, prev);
-        });
-
-        obj.$element.on("O", function(){
-            obj.options.over(obj, nxt, prev);
-        });
-
-        obj.$element.on("U", function(){
-            obj.options.under(obj, nxt, prev);
-        });
 
         $(window).on("resize scroll", function(){
             obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
 
-            if(prev) {
-                prev.$element.objProps.init(prev.$element).update(prev.$element, prev.options);
-            }
-
-            if(nxt) {
-                nxt.$element.objProps.init(nxt.$element).update(nxt.$element, nxt.options);
-            }
-
             if(obj.$element.objProps.isInViewport()) {
                 obj.$element.objProps.currentEvent = obj.$element.objProps.status();
                 if((!obj.options.onlyFirstTime && obj.$element.objProps.currentEvent === obj.$element.objProps.lastEvent) || obj.$element.objProps.currentEvent != obj.$element.objProps.lastEvent) {
-                    obj.$element.trigger(obj.$element.objProps.currentEvent);
-                    
-                    // if(obj.options.lightBoxEffect) {
-                    //     Standout.fireEvent(obj, nxt, prev);
-                    // }
+                    // triggering the event passing along the current object
+                    obj.$element.trigger(obj.$element.objProps.currentEvent, [obj]);
 
                 }
                 obj.$element.objProps.lastEvent = obj.$element.objProps.currentEvent;
@@ -116,43 +76,31 @@
     }
 
     /* Private */
-    Standout.fireEvent = function(obj, nxtObj, prvObj){
+    Standout.prototype.registerLightboxEvents = function(){
 
-        // switch(obj.$element.objProps.currentEvent) {
-        //     case "EB":
-        //         obj.options.enteringFromBottom(obj, nxtObj, prvObj);
-        //         break;
-        //     case "EXB":
-        //         obj.options.exitingFromBottom(obj, nxtObj, prvObj);
-        //         break;
-        //     case "ET":
-        //         obj.options.enteringFromTop(obj, nxtObj, prvObj);
-        //         break;
-        //     case "EXT":
-        //         obj.options.exitingFromTop(obj, nxtObj, prvObj);
-        //         break;
-        //     case "C":
-        //         obj.options.center(obj);
-        //         break;
-        //     case "O":
-        //         obj.options.over(obj, nxtObj, prvObj);
-        //         break;
-        //     case "U":
-        //         obj.options.under(obj, nxtObj, prvObj);
-        //         break;
-        //     default:
-        //         break;
-        // }
+        let obj = this;
+        let prvObj = this.getPrevElement(this.i);
+        let nxtObj = this.getNextElement(this.i);
+
+        /* LIGHTBOX EVENTS */        
+        obj.$element.on("EB EXB ET EXT O  U", function(){
+            return obj.$element.objProps.fading(obj, nxtObj, prvObj);
+        });
+
+        obj.$element.on("C", function(){
+            return obj.$element.objProps.showing(obj);
+        });
+
     }
 
     /* Public */
     Standout.prototype.destroy = function() {
-         this.$element.removeData();
+        this.$element.removeData();
     }
 
     /* Private */
     Standout.prototype.getOptions = function(options) {
-        return options.lightBoxEffect ? $.extend({}, Standout.defaults, options, Standout.lightboxMethods) : $.extend({}, Standout.defaults, options);
+        return options.lightBoxEffect ? $.extend({}, Standout.defaults, options, Standout.lightboxOptions) : $.extend({}, Standout.defaults, options);
     }
 
     /* Private */
@@ -191,13 +139,6 @@
         // You should insert here the original function that will be executed only once after the element is appended at the body
         compatibility: false,
         dynamicContentListeners: false,
-        enteringFromTop: false,
-        exitingFromTop: false,
-        center: false,
-        enteringFromBottom: false,
-        exitingFromBottom: false,
-        under: false,
-        over: false,
         // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
         onlyFirstTime: true,
         showDemoLayout: false,
@@ -221,14 +162,8 @@
     }
 
     /* Private */
-    Standout.lightboxMethods = {
-        enteringFromTop: function(obj, nxtObj, prvObj){return obj.$element.objProps.fading(obj, nxtObj, prvObj);},
-        exitingFromTop: function(obj, nxtObj, prvObj){return obj.$element.objProps.fading(obj, nxtObj, prvObj);},
-        center: function(obj){return obj.$element.objProps.showing(obj);},
-        enteringFromBottom: function(obj, nxtObj, prvObj){return obj.$element.objProps.fading(obj, nxtObj, prvObj);},
-        exitingFromBottom: function(obj, nxtObj, prvObj){return obj.$element.objProps.fading(obj, nxtObj, prvObj);},
-        under: function(obj, nxtObj, prvObj){obj.$element.objProps.fading(obj, nxtObj, prvObj);},
-        over: function(obj, nxtObj, prvObj){obj.$element.objProps.fading(obj, nxtObj, prvObj);},
+    Standout.lightboxOptions = {
+        // Override onlyFirstTime option
         onlyFirstTime: false
     }
 
