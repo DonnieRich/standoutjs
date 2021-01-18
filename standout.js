@@ -61,44 +61,203 @@
         let obj = this;
 
         $(window).on("resize scroll", function(){
-            obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
+            //obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
+            obj.initObj();
+            obj.updateObj();
 
-            if(obj.$element.objProps.isInViewport()) {
-                obj.$element.objProps.currentEvent = obj.$element.objProps.status();
-                if((!obj.options.onlyFirstTime && obj.$element.objProps.currentEvent === obj.$element.objProps.lastEvent) || obj.$element.objProps.currentEvent != obj.$element.objProps.lastEvent) {
+            // if(obj.$element.objProps.isInViewport()) {
+            if(obj.isInViewport()) {
+                //obj.$element.objProps.currentEvent = obj.$element.objProps.status();
+                obj.setCurrentEvent();
+                if((!obj.options.onlyFirstTime && obj.checkIfLastEvent()) || !obj.checkIfLastEvent()) {
                     // triggering the event passing along the current object
                     obj.$element.trigger(obj.$element.objProps.currentEvent, [obj]);
                 }
-                obj.$element.objProps.lastEvent = obj.$element.objProps.currentEvent;
+                obj.setLastEvent();
             } else {
                 // Reset current event when element is not in viewport
-                obj.$element.objProps.currentEvent = "";
-                obj.$element.objProps.lastEvent = "";
+                obj.resetEvents();
             }
         });
     }
 
+    Standout.prototype.isInViewport = function() {
+        return this.$element.objProps.elementBottom > this.$element.objProps.viewportTop && this.$element.objProps.elementTop < this.$element.objProps.viewportBottom && this.$element.objProps.initialized;
+    }
+
+    Standout.prototype.setCurrentEvent = function() {
+        let objProps = this.$element.objProps;
+        let event = "U";
+        if(objProps.lastViewportTop === 0) {objProps.lastViewportTop = objProps.viewportTop;}
+
+        if(objProps.elementCenterPosition >= objProps.viewportTopLimit && objProps.elementCenterPosition <= objProps.viewportBottomLimit) {
+            event = "C";
+        } else {
+            if(objProps.elementBottomPosition < objProps.viewportTopLimit) {
+                event = "O";
+            } else {
+                if (objProps.elementBottomPosition > objProps.viewportTopLimit && objProps.elementCenterPosition < objProps.viewportTopLimit) {
+                    if(objProps.viewportTop < objProps.lastViewportTop) {
+                        event = "ET";
+                    } else {
+                        event = "EXT";
+                    }
+                } else if (objProps.elementTopPosition < objProps.viewportBottomLimit && objProps.elementCenterPosition > objProps.viewportBottomLimit) {
+                    if(objProps.viewportTop > objProps.lastViewportTop) {
+                        event = "EB";
+                    } else {
+                        event = "EXB";
+                    }
+                }
+            }
+        }
+
+        objProps.lastViewportTop = objProps.viewportTop;
+        //return event;
+        objProps.currentEvent = event;
+    }
+
+    Standout.prototype.getCurrentEvent = function() {
+        return this.$element.objProps.currentEvent;
+    }
+
+    Standout.prototype.setLastEvent = function() {
+        this.$element.objProps.lastEvent = this.$element.objProps.currentEvent;
+    }
+
+    Standout.prototype.getLastEvent = function() {
+        return this.$element.objProps.lastEvent;
+    }
+
+    Standout.prototype.getViewportBottomLimit = function() {
+        return this.$element.objProps.viewportBottomLimit;
+    }
+
+    Standout.prototype.getViewportTopLimit = function() {
+        return this.$element.objProps.viewportTopLimit;
+    }
+
+    Standout.prototype.getElementCenterPosition = function() {
+        return this.$element.objProps.elementCenterPosition;
+    }
+
+    Standout.prototype.getElementHeight = function() {
+        return this.$element.objProps.elementHeight;
+    }
+
+    Standout.prototype.checkIfLastEvent = function() {
+        return this.$element.objProps.lastEvent === this.$element.objProps.currentEvent;
+    }
+
+    Standout.prototype.resetEvents = function() {
+        this.$element.objProps.lastEvent = this.$element.objProps.currentEvent = "";
+    }
+
+    Standout.prototype.initObj = function() {
+        this.$element.objProps.originalTop = this.$element.offset().top;
+        this.$element.objProps.originalLeft = this.$element.offset().left;
+        this.$element.objProps.initialized = true;
+    }
+
+    Standout.prototype.updateObj = function() {
+        let objProps = this.$element.objProps;
+        objProps.initialized = true;
+        objProps.elementWidth = this.$element.width();
+        objProps.elementHeight = this.$element.outerHeight();
+        objProps.elementTop = this.$element.offset().top;
+        objProps.elementCenter = objProps.elementTop + objProps.elementHeight/2;
+        objProps.elementBottom = objProps.elementTop + objProps.elementHeight;
+        objProps.viewportHeight = $(window).height();
+        objProps.viewportTop = $(window).scrollTop();
+        objProps.viewportBottom = objProps.viewportTop + $(window).height();
+        objProps.viewportTopLimit = objProps.viewportHeight*this.options.top;
+        objProps.viewportBottomLimit = objProps.viewportHeight - objProps.viewportHeight*this.options.bottom;
+        objProps.viewportCenterLimit = objProps.viewportTopLimit + (objProps.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
+        objProps.elementTopPosition = objProps.elementTop - objProps.viewportTop;
+        objProps.elementCenterPosition = objProps.elementTopPosition + objProps.elementHeight/2;
+        objProps.elementBottomPosition = objProps.elementTopPosition + objProps.elementHeight;
+    }
+
+    Standout.prototype.calculateOpacityValue = function(limit) {
+        let max = this.getElementHeight()/2;
+        let current = Math.abs(limit - this.getElementCenterPosition());
+        let opacity = (max - current) / max;
+        return opacity;
+    }
+
+    Standout.prototype.getCurrentElementOpacity = function() {
+        let opacity = 0;
+        let status = this.getCurrentEvent();
+
+        switch(status) {
+            case "C":
+                opacity = 1;
+                break;
+            case "EB":
+            case "EXB":
+                opacity = this.calculateOpacityValue(this.getViewportBottomLimit());
+                break;
+            case "ET":
+            case "EXT":
+                opacity = this.calculateOpacityValue(this.getViewportTopLimit());
+                break;
+            default:
+                break;
+        }
+
+        return opacity.toFixed(2);
+    }
+
+    Standout.prototype.getPrevNextElementOpacity = function() {
+        // Take the max value between current, next and prev elements in viewport
+        let c, nxt, prev;
+        c = nxt = prev = 0;
+
+        let nxtObj = this.getNextElement(this.i);
+        let prvObj = this.getPrevElement(this.i);
+
+        c = this.getCurrentElementOpacity();
+
+        if(typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
+            nxt = nxtObj.getCurrentElementOpacity();
+        }
+
+        if(typeof prvObj !== "undefined" && prvObj.$element.hasOwnProperty("objProps")) {
+            prev = prvObj.getCurrentElementOpacity();
+        }
+
+        return Math.max(c, nxt, prev);
+    }
+
     /* Private */
     Standout.prototype.registerLightboxEvents = function(){
-
         let obj = this;
-        let prvObj = this.getPrevElement(this.i);
-        let nxtObj = this.getNextElement(this.i);
 
         /* LIGHTBOX EVENTS */        
-        obj.$element.on("EB EXB ET EXT O  U", function(){
-            return obj.$element.objProps.fading(obj, nxtObj, prvObj);
-        });
-
-        obj.$element.on("C", function(){
-            return obj.$element.objProps.showing(obj);
+        obj.$element.on("EB EXB ET EXT O  U C", function(){
+            return obj.fading();
         });
 
     }
 
-    /* Public */
-    Standout.prototype.destroy = function() {
-        this.$element.removeData();
+    Standout.prototype.fading = function() {
+        let objProps = this.$element.objProps;
+        let overlayPercentage = this.getPrevNextElementOpacity();
+        $("#overlayStandout").css({
+            "display": "block",
+            "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
+        });
+        $("." + this.clonedId).css({
+            "display": "block",
+            "position": "absolute",
+            "top": objProps.originalTop,
+            "left": objProps.originalLeft,
+            "z-index": "10000",
+            "width": objProps.elementWidth,
+            "height": objProps.elementHeight,
+            "margin": "0",
+            "opacity": this.getCurrentElementOpacity() < 1 ? this.getCurrentElementOpacity() : 1
+        });
     }
 
     /* Private */
@@ -188,148 +347,7 @@
         viewportBottom: 0,
         lastViewportTop: 0,
         lastEvent: "",
-        currentEvent: "",
-        isInViewport: function() {
-            return this.elementBottom > this.viewportTop && this.elementTop < this.viewportBottom && this.initialized;
-        },
-        status: function() {
-            // TODO: test refactored code
-            let status = "U";
-            if(this.lastViewportTop === 0) {this.lastViewportTop = this.viewportTop;}
-
-            if(this.elementCenterPosition >= this.viewportTopLimit && this.elementCenterPosition <= this.viewportBottomLimit) {
-                status = "C";
-            } else {
-                if(this.elementBottomPosition < this.viewportTopLimit) {
-                    status = "O";
-                } else {
-                    if (this.elementBottomPosition > this.viewportTopLimit && this.elementCenterPosition < this.viewportTopLimit) {
-                        if(this.viewportTop < this.lastViewportTop) {
-                            status = "ET";
-                        } else {
-                            status = "EXT";
-                        }
-                    } else if (this.elementTopPosition < this.viewportBottomLimit && this.elementCenterPosition > this.viewportBottomLimit) {
-                        if(this.viewportTop > this.lastViewportTop) {
-                            status = "EB";
-                        } else {
-                            status = "EXB";
-                        }
-                    }
-                }
-            }
-
-            this.lastViewportTop = this.viewportTop;
-            return status;
-        },
-        percentage: function() {
-            let opacity = 0;
-            let status = this.currentEvent;
-
-            switch(status) {
-                case "C":
-                    opacity = 1;
-                    break;
-                case "EB":
-                case "EXB":
-                    opacity = this.getOpacity(this.viewportBottomLimit);
-                    break;
-                case "ET":
-                case "EXT":
-                    opacity = this.getOpacity(this.viewportTopLimit);
-                    break;
-                default:
-                    break;
-            }
-
-            return opacity.toFixed(2);
-        },
-        getOpacity: function(limit) {
-            let max = this.elementHeight/2;
-            let current = Math.abs(limit - this.elementCenterPosition);
-            let opacity = (max - current) / max;
-            return opacity;
-        },
-        update: function(el, opt) {
-            this.initialized = true;
-            this.elementWidth = el.width();
-            this.elementHeight = el.outerHeight();
-            this.elementTop = el.offset().top;
-            this.elementCenter = this.elementTop + this.elementHeight/2;
-            this.elementBottom = this.elementTop + this.elementHeight;
-            this.viewportHeight = $(window).height();
-            this.viewportTop = $(window).scrollTop();
-            this.viewportBottom = this.viewportTop + $(window).height();
-            this.viewportTopLimit = this.viewportHeight*opt.top;
-            this.viewportBottomLimit = this.viewportHeight - this.viewportHeight*opt.bottom;
-            this.viewportCenterLimit = this.viewportTopLimit + (this.viewportHeight * (1 - (opt.top + opt.bottom)) * 0.5);
-            this.elementTopPosition = this.elementTop - this.viewportTop;
-            this.elementCenterPosition = this.elementTopPosition + this.elementHeight/2;
-            this.elementBottomPosition = this.elementTopPosition + this.elementHeight;
-            return this;
-        },
-        init: function(el) {
-            this.originalTop = el.offset().top;
-            this.originalLeft = el.offset().left;
-            this.initialized = true;
-            return this;
-        },
-        fading: function(obj, nxtObj, prvObj) {
-            let overlayPercentage = this.getCorrectOverlayPercentage(nxtObj, prvObj);
-            $("#overlayStandout").css({
-                "display": "block",
-                "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
-            });
-            $("."+obj.clonedId).css({
-                "display": "block",
-                "position": "absolute",
-                "top": this.originalTop,
-                "left": this.originalLeft,
-                "z-index": "10000",
-                "width": this.elementWidth,
-                "height": this.elementHeight,
-                "margin": "0",
-                "opacity": this.percentage() < 1 ? this.percentage() : 1
-            });
-            return this;
-        },
-        showing: function(obj) {
-            $("#overlayStandout").css({
-                "display": "block",
-                "opacity": this.percentage() > 0.75 ? 0.75 : this.percentage()
-            });
-            $("."+obj.clonedId).css({
-                "display": "block",
-                "position": "absolute",
-                "top": this.originalTop,
-                "left": this.originalLeft,
-                "z-index": "10000",
-                "width": this.elementWidth,
-                "height": this.elementHeight,
-                "opacity": this.percentage() > 1 ? 1 : this.percentage()
-            });
-            // console.log("IS SHOWING");
-            return this;
-        },
-        hiding: function() {
-            return this;
-        },
-        getCorrectOverlayPercentage: function(nxtObj, prvObj){
-            // Take the max value between current, next and prev elements in viewport
-            let c, nxt, prev;
-            c = nxt = prev = 0;
-
-            c = this.percentage();
-            if(typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
-                nxt = nxtObj.$element.objProps.percentage();
-            }
-
-            if(typeof prvObj !== "undefined" && prvObj.$element.hasOwnProperty("objProps")) {
-                prev = prvObj.$element.objProps.percentage();
-            }
-
-            return Math.max(c, nxt, prev);
-        }
+        currentEvent: ""
     }
 
     /* Private */
@@ -398,8 +416,17 @@
                     $.data(this, 'plugin_' + pluginName, new Standout( allElements[i], i, options, (i === lastIdx) ));
                 }
             });
+        } 
+        // If the first parameter is a string and it doesn't start
+        // with an underscore or "contains" the `init`-function,
+        // treat this as a call to a public method.
+        else if (typeof options === 'string' && options[0] !== '_' && options !== 'init') { 
+            // Allow instances to be destroyed via the 'destroy' method
+            if (options === 'destroy') {
+                $.data(this, 'plugin_' + pluginName, null);
+            }
         } else {
-            console.log("No public methods availables");
+            console.log("No public method available");
         }
     }
 
