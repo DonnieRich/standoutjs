@@ -297,10 +297,6 @@
 
     /* Private */
     Standout.defaults = {
-        // First two parameters allow the execution of code right after the element is cloned (ie. register waypoint event for the new content, etc...)
-        // You should insert here the original function that will be executed only once after the element is appended at the body
-        compatibility: false,
-        dynamicContentListeners: false,
         // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
         onlyFirstTime: true,
         showDemoLayout: false,
