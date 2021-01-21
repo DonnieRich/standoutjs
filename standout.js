@@ -389,15 +389,8 @@
     }
 
     /* Private */
-    Standout.getOuterHtml = function(el, c){
-        el = $(el);
-        return $('<div />').append(el.eq(0).clone().css("display", "none").addClass(c)).html();
-    }
-
-    /* Private */
     Standout.duplicateElement = function(el, c) {
-        let html = Standout.getOuterHtml(el, c);
-        $("body").append(html);
+        $(el).clone(true, true).addClass(c).css("display", "none").appendTo("body");
     }
 
     $.fn[pluginName] = function(options) {
