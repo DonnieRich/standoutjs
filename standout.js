@@ -69,11 +69,14 @@
             if(obj.isInViewport()) {
                 //obj.$element.objProps.currentEvent = obj.$element.objProps.status();
                 obj.setCurrentEvent();
-                if((!obj.options.onlyFirstTime && obj.checkIfLastEvent()) || !obj.checkIfLastEvent()) {
+                if((!obj.options.oncePerEvent) || 
+                   (obj.options.onlyFirstTime && obj.options.oncePerEvent && !obj.checkIfEventAlreadyTriggered()) ||
+                   (obj.options.oncePerEvent && !obj.options.onlyFirstTime && !obj.checkIfLastEvent())) {
                     // triggering the event passing along the current object
                     obj.$element.trigger(obj.$element.objProps.currentEvent, [obj]);
                 }
                 obj.setLastEvent();
+                obj.addEventToQueue();
             } else {
                 // Reset current event when element is not in viewport
                 obj.resetEvents();
@@ -146,7 +149,17 @@
     }
 
     Standout.prototype.checkIfLastEvent = function() {
-        return this.$element.objProps.lastEvent === this.$element.objProps.currentEvent;
+        return this.getLastEvent() === this.getCurrentEvent();
+    }
+
+    Standout.prototype.checkIfEventAlreadyTriggered = function() {
+        return this.$element.objProps.eventsQueue.includes(this.getCurrentEvent());
+    }
+
+    Standout.prototype.addEventToQueue = function() {
+        if(!this.checkIfEventAlreadyTriggered()) {
+            this.$element.objProps.eventsQueue.push(this.getCurrentEvent());
+        }
     }
 
     Standout.prototype.resetEvents = function() {
@@ -298,7 +311,8 @@
     /* Private */
     Standout.defaults = {
         // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
-        onlyFirstTime: true,
+        onlyFirstTime: false,
+        oncePerEvent: true,
         showDemoLayout: false,
         lightBoxEffect: false,
         backgroundColor: "#000000",
@@ -321,8 +335,8 @@
 
     /* Private */
     Standout.lightboxOptions = {
-        // Override onlyFirstTime option
-        onlyFirstTime: false
+        onlyFirstTime: false,
+        oncePerEvent: false
     }
 
     /* Private */
@@ -343,7 +357,9 @@
         viewportBottom: 0,
         lastViewportTop: 0,
         lastEvent: "",
-        currentEvent: ""
+        currentEvent: "",
+        eventsQueue: [],
+        maxEventsInQueue: 7
     }
 
     /* Private */
