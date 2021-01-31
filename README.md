@@ -164,7 +164,7 @@ jQuery >= 1.9.1
 
 
 ## Credits
-Basic plugin structure from: https://gist.github.com/alvinpascoe/e420f015a665fcfb4909e6cddc70b348
+Basic plugin structure from: https://github.com/alvinpascoe/jquery-boilerplate
 
 Tips and technical support: www.manvitech.it
 
