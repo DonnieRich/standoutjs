@@ -110,30 +110,22 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 $(".standout").standout({
-                    onlyFirstTime: false,
-                    showDemoLayout: false,
-                    lightBoxEffect: true
-                    // enteringFromTop: function() {
-                    //     alert("ENTERING FROM TOP");
-                    // },
-                    // exitingFromTop: function() {
-                    //     alert("EXITING FROM TOP");
-                    // },
-                    // center: function() {
-                    //     alert("ELEMENT AT CENTER");
-                    // },
-                    // enteringFromBottom: function() {
-                    //     alert("ENTERING FROM BOTTOM");
-                    // },
-                    // exitingFromBottom: function() {
-                    //     alert("EXITING FROM BOTTOM");
-                    // },
-                    // over: function() {
-                    //     alert("ELEMENT OVER");
-                    // },
-                    // under: function() {
-                    //     alert("ELEMENT UNDER");
-                    // }
+                    showDemoLayout: true,
+                    lightBoxEffect: false
+                }).on("ET", function(e, obj){
+                    alert("ENTERING FROM TOP " + obj.idx);
+                }).on("EXT", function(e, obj){
+                    alert("EXITING FROM TOP " + obj.idx);
+                }).on("EB", function(e, obj){
+                    alert("ENTERING FROM BOTTOM " + obj.idx);
+                }).on("EXB", function(e, obj){
+                    alert("EXITING FROM BOTTOM " + obj.idx);
+                }).on("C", function(e, obj){
+                    alert("ELEMENT AT CENTER " + obj.idx);
+                }).on("O", function(e, obj){
+                    alert("ELEMENT OVER " + obj.idx);
+                }).on("U", function(e, obj){
+                    alert("ELEMENT UNDER " + obj.idx);
                 });
             });
             function alert(msg) {

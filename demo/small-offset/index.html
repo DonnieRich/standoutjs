@@ -157,34 +157,27 @@
         <script type="text/javascript">
             $(document).ready(function() {
                 $(".standout").standout({
-                    onlyFirstTime: true,
-                    showDemoLayout: true,
-                    lightBoxEffect: false,
+                    onlyFirstTime: false,
+                    showDemoLayout: false,
+                    lightBoxEffect: true,
                     top: 0.7,
-                    bottom: 0.1,
-                    enteringFromTop: function(obj) {
-                        console.log(this);
-                        alert("ENTERING FROM TOP " + obj.idx);
-                    },
-                    exitingFromTop: function(obj) {
-                        alert("EXITING FROM TOP " + obj.idx);
-                    },
-                    center: function(obj) {
-                        alert("ELEMENT AT CENTER " + obj.idx);
-                    },
-                    enteringFromBottom: function(obj) {
-                        alert("ENTERING FROM BOTTOM " + obj.idx);
-                    },
-                    exitingFromBottom: function(obj) {
-                        alert("EXITING FROM BOTTOM " + obj.idx);
-                    },
-                    over: function(obj) {
-                        alert("ELEMENT OVER " + obj.idx);
-                    },
-                    under: function(obj) {
-                        alert("ELEMENT UNDER " + obj.idx);
-                    }
+                    bottom: 0.1
                 });
+                // }).on("ET", function(e, obj){
+                //     alert("ENTERING FROM TOP " + obj.idx);
+                // }).on("EXT", function(e, obj){
+                //     alert("EXITING FROM TOP " + obj.idx);
+                // }).on("EB", function(e, obj){
+                //     alert("ENTERING FROM BOTTOM " + obj.idx);
+                // }).on("EXB", function(e, obj){
+                //     alert("EXITING FROM BOTTOM " + obj.idx);
+                // }).on("C", function(e, obj){
+                //     alert("ELEMENT AT CENTER " + obj.idx);
+                // }).on("O", function(e, obj){
+                //     alert("ELEMENT OVER " + obj.idx);
+                // }).on("U", function(e, obj){
+                //     alert("ELEMENT UNDER " + obj.idx);
+                // });
             });
             function alert(msg) {
                 let alert = $("#template").clone().find(".alert").append("<p>" + msg + "</p>");
