@@ -161,3 +161,11 @@ Enable or disable the plugin.
 
 ## Requirements
 jQuery >= 1.9.1
+
+
+## Credits
+Basic plugin structure from: https://gist.github.com/alvinpascoe/e420f015a665fcfb4909e6cddc70b348
+
+Tips and technical support: www.manvitech.it
+
+Moral support: Lois, my love
