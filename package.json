@@ -1,0 +1,52 @@
+{
+  "name": "standoutjs",
+  "version": "2.3.2",
+  "description": "A jQuery plugin that creates events when a certain DOM element is in a position relative to a selected portion of the viewport.",
+  "main": "./dist/standout.min.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "jquery": "^3.5.1"
+  },
+  "devDependencies": {
+    "del": "^6.0.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "exec": "^0.2.1",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-bump": "^3.2.0",
+    "gulp-cli": "^2.3.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-header": "^2.0.9",
+    "gulp-jshint": "^2.1.0",
+    "gulp-load-plugins": "^2.0.6",
+    "gulp-rename": "^2.0.0",
+    "gulp-replace": "^1.0.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "gulp-terser": "^2.0.1",
+    "gulp-zip": "^5.0.2",
+    "yargs": "^16.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DonnieRich/standoutjs.git"
+  },
+  "keywords": [
+    "jquery",
+    "viewport",
+    "customEvents",
+    "jquery-plugin",
+    "ecosystem:jquery"
+  ],
+  "author": "Donato Pasquale Riccio (Donnie Rich)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DonnieRich/standoutjs/issues"
+  },
+  "homepage": "https://github.com/DonnieRich/standoutjs#readme"
+}
