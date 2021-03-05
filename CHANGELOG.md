@@ -5,10 +5,10 @@
 ### Standout 2.3.3 2021-03-05
 
 #### New
-* undefined
+* New plugin version
 
 #### Fix
-* undefined
+* Code refactoring
+* Added module export for npm package
 
 #### Changes
-* undefined
