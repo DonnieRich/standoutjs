@@ -239,13 +239,13 @@
             }
 
 
-            let prefixes = ['new', 'fix', 'chg'];
+            let prefixes = ['(new)', '(fix)', '(chg)'];
             let changes = {};
 
             prefixes.forEach(p => {
                 changes[p] = stdout.split('\n').filter( line => {
                     return line.indexOf(p) !== -1;
-                }).join('\n').replace(/\n/g, '\n* ');
+                }).join('\n').replace(/ *\([^)]*\) */g,'').replace(/\n/g, '\n* ');
             });
 
             
