@@ -1,15 +1,44 @@
-;
-(function($, window, document, undefined){
-    'use strict';
+/* eslint-disable */
+(function (factory) {
+	if (typeof define === "function" && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(["jquery"], factory);
+	} else if (typeof module === "object" && module.exports) {
+		// Node/CommonJS
+		module.exports = function( root, jQuery ) {
+			if (typeof jQuery === "undefined") {
+				// require('jQuery') returns a factory that requires window to build a jQuery instance, we normalize how we use modules
+				// that require this pattern but the window provided is a noop if it's defined (how jquery works)
+				if (typeof window !== "undefined") {
+					jQuery = require("jquery");
+				}
+				else {
+					jQuery = require("jquery")(root);
+				}
+			}
+			factory(jQuery);
+			return jQuery;
+		};
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+
+}(function($, window, document, undefined) {
+
+    /* eslint-enable */
+
+    "use strict";
 
     const pluginName = "standout";
     // Demo layout
     let demoInit = false;
 
-    let allStandout = [];
+    const allStandout = [];
 
-    let defaults = {
-        // Fire the function linked to the event just the first time and not at every subsequent scroll (it will still be fired if the last event is different from the current one)
+    const defaults = {
+        // Fire the function linked to the event just the first time and not at
+        // every subsequent scroll (it will still be fired if the last event is different from the current one)
         onlyFirstTime: false,
         oncePerEvent: true,
         showDemoLayout: false,
@@ -32,12 +61,12 @@
         enabled: true
     };
 
-    let lightboxOptions = {
+    const lightboxOptions = {
         onlyFirstTime: false,
         oncePerEvent: false
     };
 
-    let objProps = {
+    const objProps = {
         initialized: false,
         originalTop: 0,
         originalLeft: 0,
@@ -59,7 +88,7 @@
         maxEventsInQueue: 7
     };
 
-    let demoLayout = {
+    const demoLayout = {
         demoLayoutTop: {
             backgroundColor: "#000000",
             opacity: "0.75",
@@ -91,199 +120,286 @@
     };
 
     function Standout(element, i, options, isLast) {
+
         this._name = pluginName;
         this.i = i;
-        this.idx = 'standout_' + this.i;
-        this.clonedId = this.idx + '_cloned';
+        this.idx = `standout_${this.i}`;
+        this.clonedId = `${this.idx}_cloned`;
         this.isLastElement = isLast;
         this.options = this._getOptions(options);
         this.element = element;
         this.enabled = this.options.enabled;
         allStandout[i] = this;
         this._init();
+
     }
 
     // Avoid Plugin.prototype conflicts
-    $.extend( Standout.prototype, {
-        
-        _init : function() {
-            
+    $.extend(Standout.prototype, {
+
+        _init() {
+
             this._buildCache();
             this._bindEvents();
 
-            if(this.options.showDemoLayout && !demoInit) {
+            if (this.options.showDemoLayout && !demoInit) {
+
                 demoInit = true;
                 this._setDemoLayout(this.options);
+
             }
 
-            if(this.options.lightBoxEffect) {
-                if($("#"+this.options.overlayId).length === 0) {
+            if (this.options.lightBoxEffect) {
+
+                if ($(`#${this.options.overlayId}`).length === 0) {
+
                     this._setOverlayLayout(this.options);
+
                 }
 
-                if($("." + this.clonedId).length === 0) {
+                if ($(`.${this.clonedId}`).length === 0) {
+
                     this._duplicateElement(this.element, this.clonedId);
+
                 }
 
-                if(this.options.compatibility && this.isLastElement && typeof this.options.dynamicContentListeners === 'function'){
+                if (this.options.compatibility && this.isLastElement && typeof this.options.dynamicContentListeners === "function") {
+
                     this.options._dynamicContentListeners();
+
                 }
 
                 this._registerLightboxEvents();
+
             }
 
         },
 
-        _buildCache : function(){
+        _buildCache() {
+
             this.$element = this._getElement(this.i);
+
         },
 
-        _bindEvents : function(){
-            let obj = this;
+        _bindEvents() {
 
-            $(window).on("resize scroll", function(){
-                //obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
+            const obj = this;
+
+            $(window).on("resize scroll", function() {
+
+                // obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
                 obj._initObj();
                 obj._updateObj();
 
                 // if(obj.$element.objProps._isInViewport()) {
-                if(obj._isInViewport()) {
-                    //obj.$element.objProps.currentEvent = obj.$element.objProps.status();
+                if (obj._isInViewport()) {
+
+                    // obj.$element.objProps.currentEvent = obj.$element.objProps.status();
                     obj._setCurrentEvent();
-                    if((!obj.options.oncePerEvent) || 
-                    (obj.options.onlyFirstTime && obj.options.oncePerEvent && !obj._checkIfEventAlreadyTriggered()) ||
-                    (obj.options.oncePerEvent && !obj.options.onlyFirstTime && !obj._checkIfLastEvent())) {
+                    if ((!obj.options.oncePerEvent)
+                    || (obj.options.onlyFirstTime && obj.options.oncePerEvent && !obj._checkIfEventAlreadyTriggered())
+                    || (obj.options.oncePerEvent && !obj.options.onlyFirstTime && !obj._checkIfLastEvent())) {
+
                         // triggering the event passing along the current object
                         obj.$element.trigger(obj.$element.objProps.currentEvent, [obj]);
+
                     }
                     obj._setLastEvent();
                     obj._addEventToQueue();
+
                 } else {
+
                     // Reset current event when element is not in viewport
                     obj._resetEvents();
+
                 }
+
             });
+
         },
 
-        _isInViewport : function() {
-            return this.$element.objProps.elementBottom > this.$element.objProps.viewportTop && this.$element.objProps.elementTop < this.$element.objProps.viewportBottom && this.$element.objProps.initialized;
+        _isInViewport() {
+
+            return this.$element.objProps.elementBottom > this.$element.objProps.viewportTop
+                && this.$element.objProps.elementTop < this.$element.objProps.viewportBottom
+                && this.$element.objProps.initialized;
+
         },
 
-        _setCurrentEvent : function() {
-            let objProps = this.$element.objProps;
+        _setCurrentEvent() {
+
+            const props = this.$element.objProps;
             let event = "U";
-            if(objProps.lastViewportTop === 0) {objProps.lastViewportTop = objProps.viewportTop;}
+            if (props.lastViewportTop === 0) {
 
-            if(objProps.elementCenterPosition >= objProps.viewportTopLimit && objProps.elementCenterPosition <= objProps.viewportBottomLimit) {
+                props.lastViewportTop = props.viewportTop;
+
+            }
+
+            if (props.elementCenterPosition >= props.viewportTopLimit && props.elementCenterPosition <= props.viewportBottomLimit) {
+
                 event = "C";
+
             } else {
-                if(objProps.elementBottomPosition < objProps.viewportTopLimit) {
+
+                if (props.elementBottomPosition < props.viewportTopLimit) {
+
                     event = "O";
+
                 } else {
-                    if (objProps.elementBottomPosition > objProps.viewportTopLimit && objProps.elementCenterPosition < objProps.viewportTopLimit) {
-                        if(objProps.viewportTop < objProps.lastViewportTop) {
+
+                    if (props.elementBottomPosition > props.viewportTopLimit && props.elementCenterPosition < props.viewportTopLimit) {
+
+                        if (props.viewportTop < props.lastViewportTop) {
+
                             event = "ET";
+
                         } else {
+
                             event = "EXT";
+
                         }
-                    } else if (objProps.elementTopPosition < objProps.viewportBottomLimit && objProps.elementCenterPosition > objProps.viewportBottomLimit) {
-                        if(objProps.viewportTop > objProps.lastViewportTop) {
+
+                    } else if (props.elementTopPosition < props.viewportBottomLimit && props.elementCenterPosition > props.viewportBottomLimit) {
+
+                        if (props.viewportTop > props.lastViewportTop) {
+
                             event = "EB";
+
                         } else {
+
                             event = "EXB";
+
                         }
+
                     }
+
                 }
+
             }
 
-            objProps.lastViewportTop = objProps.viewportTop;
-            //return event;
-            objProps.currentEvent = event;
+            props.lastViewportTop = props.viewportTop;
+            // return event;
+            props.currentEvent = event;
+
         },
 
-        _getCurrentEvent : function() {
+        _getCurrentEvent() {
+
             return this.$element.objProps.currentEvent;
+
         },
 
-        _setLastEvent : function() {
+        _setLastEvent() {
+
             this.$element.objProps.lastEvent = this.$element.objProps.currentEvent;
+
         },
 
-        _getLastEvent : function() {
+        _getLastEvent() {
+
             return this.$element.objProps.lastEvent;
+
         },
 
-        _getViewportBottomLimit : function() {
+        _getViewportBottomLimit() {
+
             return this.$element.objProps.viewportBottomLimit;
+
         },
 
-        _getViewportTopLimit : function() {
+        _getViewportTopLimit() {
+
             return this.$element.objProps.viewportTopLimit;
+
         },
 
-        _getElementCenterPosition : function() {
+        _getElementCenterPosition() {
+
             return this.$element.objProps.elementCenterPosition;
+
         },
 
-        _getElementHeight : function() {
+        _getElementHeight() {
+
             return this.$element.objProps.elementHeight;
+
         },
 
-        _checkIfLastEvent : function() {
+        _checkIfLastEvent() {
+
             return this._getLastEvent() === this._getCurrentEvent();
+
         },
 
-        _checkIfEventAlreadyTriggered : function() {
+        _checkIfEventAlreadyTriggered() {
+
             return this.$element.objProps.eventsQueue.includes(this._getCurrentEvent());
+
         },
 
-        _addEventToQueue : function() {
-            if(!this._checkIfEventAlreadyTriggered()) {
+        _addEventToQueue() {
+
+            if (!this._checkIfEventAlreadyTriggered()) {
+
                 this.$element.objProps.eventsQueue.push(this._getCurrentEvent());
+
             }
+
         },
 
-        _resetEvents : function() {
-            this.$element.objProps.lastEvent = this.$element.objProps.currentEvent = "";
+        _resetEvents() {
+
+            this.$element.objProps.lastEvent = "";
+            this.$element.objProps.currentEvent = "";
+
         },
 
-        _initObj : function() {
+        _initObj() {
+
             this.$element.objProps.originalTop = this.$element.offset().top;
             this.$element.objProps.originalLeft = this.$element.offset().left;
             this.$element.objProps.initialized = true;
+
         },
 
-        _updateObj : function() {
-            let objProps = this.$element.objProps;
-            objProps.initialized = true;
-            objProps.elementWidth = this.$element.width();
-            objProps.elementHeight = this.$element.outerHeight();
-            objProps.elementTop = this.$element.offset().top;
-            objProps.elementCenter = objProps.elementTop + objProps.elementHeight/2;
-            objProps.elementBottom = objProps.elementTop + objProps.elementHeight;
-            objProps.viewportHeight = $(window).height();
-            objProps.viewportTop = $(window).scrollTop();
-            objProps.viewportBottom = objProps.viewportTop + $(window).height();
-            objProps.viewportTopLimit = objProps.viewportHeight*this.options.top;
-            objProps.viewportBottomLimit = objProps.viewportHeight - objProps.viewportHeight*this.options.bottom;
-            objProps.viewportCenterLimit = objProps.viewportTopLimit + (objProps.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
-            objProps.elementTopPosition = objProps.elementTop - objProps.viewportTop;
-            objProps.elementCenterPosition = objProps.elementTopPosition + objProps.elementHeight/2;
-            objProps.elementBottomPosition = objProps.elementTopPosition + objProps.elementHeight;
+        _updateObj() {
+
+            const props = this.$element.objProps;
+            props.initialized = true;
+            props.elementWidth = this.$element.width();
+            props.elementHeight = this.$element.outerHeight();
+            props.elementTop = this.$element.offset().top;
+            props.elementCenter = props.elementTop + props.elementHeight / 2;
+            props.elementBottom = props.elementTop + props.elementHeight;
+            props.viewportHeight = $(window).height();
+            props.viewportTop = $(window).scrollTop();
+            props.viewportBottom = props.viewportTop + $(window).height();
+            props.viewportTopLimit = props.viewportHeight * this.options.top;
+            props.viewportBottomLimit = props.viewportHeight - props.viewportHeight * this.options.bottom;
+            props.viewportCenterLimit = props.viewportTopLimit + (props.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
+            props.elementTopPosition = props.elementTop - props.viewportTop;
+            props.elementCenterPosition = props.elementTopPosition + props.elementHeight / 2;
+            props.elementBottomPosition = props.elementTopPosition + props.elementHeight;
+
         },
 
-        _calculateOpacityValue : function(limit) {
-            let max = this._getElementHeight()/2;
-            let current = Math.abs(limit - this._getElementCenterPosition());
-            let opacity = (max - current) / max;
+        _calculateOpacityValue(limit) {
+
+            const max = this._getElementHeight() / 2;
+            const current = Math.abs(limit - this._getElementCenterPosition());
+            const opacity = (max - current) / max;
             return opacity;
+
         },
 
-        _getCurrentElementOpacity : function() {
-            let opacity = 0;
-            let status = this._getCurrentEvent();
+        _getCurrentElementOpacity() {
 
-            switch(status) {
+            let opacity = 0;
+            const status = this._getCurrentEvent();
+
+            switch (status) {
+
                 case "C":
                     opacity = 1;
                     break;
@@ -297,138 +413,177 @@
                     break;
                 default:
                     break;
+
             }
 
             return opacity.toFixed(2);
+
         },
 
-        _getPrevNextElementOpacity : function() {
-            // Take the max value between current, next and prev elements in viewport
-            let c, nxt, prev;
-            c = nxt = prev = 0;
+        _getPrevNextElementOpacity() {
 
-            let nxtObj = this._getNextElement(this.i);
-            let prvObj = this._getPrevElement(this.i);
+            // Take the max value between current, next and prev elements in viewport
+            let c = 0;
+            let nxt = 0;
+            let prev = 0;
+
+            const nxtObj = this._getNextElement(this.i);
+            const prvObj = this._getPrevElement(this.i);
 
             c = this._getCurrentElementOpacity();
 
-            if(typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
+            if (typeof nxtObj !== "undefined" && nxtObj.$element.hasOwnProperty("objProps")) {
+
                 nxt = nxtObj._getCurrentElementOpacity();
+
             }
 
-            if(typeof prvObj !== "undefined" && prvObj.$element.hasOwnProperty("objProps")) {
+            if (typeof prvObj !== "undefined" && prvObj.$element.hasOwnProperty("objProps")) {
+
                 prev = prvObj._getCurrentElementOpacity();
+
             }
 
             return Math.max(c, nxt, prev);
+
         },
 
-        
-        _registerLightboxEvents : function(){
-            let obj = this;
+        _registerLightboxEvents() {
 
-            /* LIGHTBOX EVENTS */        
-            obj.$element.on("EB EXB ET EXT O  U C", function(){
+            const obj = this;
+
+            /* LIGHTBOX EVENTS */
+            obj.$element.on("EB EXB ET EXT O  U C", function() {
+
                 return obj._fading();
+
             });
 
         },
 
-        _fading : function() {
-            let objProps = this.$element.objProps;
-            let overlayPercentage = this._getPrevNextElementOpacity();
+        _fading() {
+
+            const props = this.$element.objProps;
+            const overlayPercentage = this._getPrevNextElementOpacity();
             $("#overlayStandout").css({
                 "display": "block",
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
             });
-            $("." + this.clonedId).css({
+            $(`.${this.clonedId}`).css({
                 "display": "block",
                 "position": "absolute",
-                "top": objProps.originalTop,
-                "left": objProps.originalLeft,
+                "top": props.originalTop,
+                "left": props.originalLeft,
                 "z-index": "10000",
-                "width": objProps.elementWidth,
-                "height": objProps.elementHeight,
+                "width": props.elementWidth,
+                "height": props.elementHeight,
                 "margin": "0",
                 "opacity": this._getCurrentElementOpacity() < 1 ? this._getCurrentElementOpacity() : 1
             });
+
         },
 
-        
-        _getOptions : function(options) {
+        _getOptions(options) {
+
             return options.lightBoxEffect ? $.extend({}, defaults, options, lightboxOptions) : $.extend({}, defaults, options);
+
         },
 
-        
-        _getElement : function(i) {
+        _getElement(i) {
+
             let obj = false;
-            if (typeof allStandout[i] !== 'undefined' && i > -1 && i < allStandout.length) {
+            if (typeof allStandout[i] !== "undefined" && i > -1 && i < allStandout.length) {
+
                 obj = $(allStandout[i].element);
                 obj.objProps = $.extend({}, objProps);
+
             }
             return obj;
+
         },
 
-        
-        _getNextElement : function(i) {
-            return allStandout[i+1];
+        _getNextElement(i) {
+
+            return allStandout[i + 1];
+
         },
 
-        
-        _getPrevElement : function(i) {
-            return allStandout[i-1];
+        _getPrevElement(i) {
+
+            return allStandout[i - 1];
+
         },
 
-        _setDemoLayout : function(opt) {
-            let overlay = $("<div />").css(demoLayout.demoLayoutTop).css("height", "calc(100vh*" + opt.top + ")").attr("id", "demoLayoutTop");
+        _setDemoLayout(opt) {
+
+            let overlay = $("<div />").css(demoLayout.demoLayoutTop).css("height", `calc(100vh * ${opt.top})`).attr("id", "demoLayoutTop");
             $("body").append(overlay);
-            overlay = $("<div />").css(demoLayout.demoLayoutCenter).css("top", "calc(100vh * " + opt.top + " + (100vh - (100vh * " + opt.top + " + 100vh * " + opt.bottom + "))/2)");
+            overlay = $("<div />").css(demoLayout.demoLayoutCenter).css("top", `calc(100vh * ${opt.top} + (100vh - (100vh * ${opt.top} + 100vh * ${opt.bottom})) / 2)`);
             $("body").append(overlay);
-            overlay = $("<div />").css(demoLayout.demoLayoutBottom).css("height", "calc(100vh*" + opt.bottom + ")").attr("id", "demoLayoutBottom");
+            overlay = $("<div />").css(demoLayout.demoLayoutBottom).css("height", `calc(100vh * ${opt.bottom})`).attr("id", "demoLayoutBottom");
             $("body").append(overlay);
+
         },
 
-        
-        _setOverlayLayout : function(opt){
-            let overlay = $("<div />").css(opt.overlay).attr("id", opt.overlayId);
+        _setOverlayLayout(opt) {
+
+            const overlay = $("<div />").css(opt.overlay).attr("id", opt.overlayId);
             $("body").append(overlay);
+
         },
 
-        
-        _duplicateElement : function(el, c) {
-            $(el).clone(true, true).addClass(c).css("display", "none").appendTo("body");
+        _duplicateElement(el, c) {
+
+            $(el).clone(true, true).addClass(c).css("display", "none")
+                .appendTo("body");
+
         },
     });
 
-
+    /* eslint-disable */
     $.fn[pluginName] = function(options) {
-        if (options === undefined || typeof options === 'object') {
-            let allElements = this;
-            let lastIdx = allElements.length - 1;
-            return this.each(function(i){
+    /* eslint-enable */
+
+        if (options === undefined || typeof options === "object") {
+
+            const allElements = this;
+            const lastIdx = allElements.length - 1;
+            return this.each(function(i) {
+
                 // Only allow the plugin to be instantiated once,
                 // so we check that the element has no plugin instantiation yet
-                if (!$.data(this, 'plugin_' + pluginName)) {
+                if (!$.data(this, `plugin_${pluginName}`)) {
 
                     // if it has no instance, create a new one,
                     // pass options to our plugin constructor,
                     // and store the plugin instance
                     // in the elements jQuery data object.
-                    $.data(this, 'plugin_' + pluginName, new Standout( allElements[i], i, options, (i === lastIdx) ));
+                    $.data(this, `plugin_${pluginName}`, new Standout(allElements[i], i, options, (i === lastIdx)));
+
                 }
+
             });
-        } 
+
+        }
+
         // If the first parameter is a string and it doesn't start
         // with an underscore or "contains" the `init`-function,
         // treat this as a call to a public method.
-        else if (typeof options === 'string' && options[0] !== '_' && options !== 'init') { 
-            // Allow instances to be destroyed via the 'destroy' method
-            if (options === 'destroy') {
-                $.data(this, 'plugin_' + pluginName, null);
-            }
-        } else {
-            console.log("No public method available");
-        }
-    }
+        if (typeof options === "string" && options[0] !== "_" && options !== "init") {
 
-}(jQuery, window, document));
+            // Allow instances to be destroyed via the 'destroy' method
+            if (options === "destroy") {
+
+                $.data(this, `plugin_${pluginName}`, null);
+
+            }
+
+        } else {
+
+            console.log("No public method available");
+
+        }
+
+    };
+
+}(jQuery, window, document)));
