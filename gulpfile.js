@@ -254,13 +254,13 @@
                 '### Standout ' + version + ' ' + date,
                 '',
                 '#### New',
-                '* ' + changes['new'],
+                '* ' + changes['(new)'],
                 '',
                 '#### Fix',
-                '* ' + changes['fix'],
+                '* ' + changes['(fix)'],
                 '',
                 '#### Changes',
-                '* ' + changes['chg']
+                '* ' + changes['(chg)']
             ].join('\n');
 
             changelog = changelog.replace(/(## CHANGE LOG)/, '$1\n\n' + updates);
