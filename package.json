@@ -1,6 +1,6 @@
 {
   "name": "standoutjs",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "A jQuery plugin that creates events when a certain DOM element is in a position relative to a selected portion of the viewport.",
   "main": "./dist/standout.min.js",
   "directories": {
