@@ -437,12 +437,15 @@
 
             const props = this.$element.objProps;
             const overlayPercentage = this._getPrevNextElementOpacity();
+            const displayOverlay = overlayPercentage <= 0 ? "none" : "block";
+            const displayElement = this._getCurrentElementOpacity() <= 0 ? "none" : "block";
+
             jQuery("#overlayStandout").css({
-                "display": "block",
+                "display": displayOverlay,
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
             });
             jQuery(`.${this.clonedId}`).css({
-                "display": "block",
+                "display": displayElement,
                 "position": "absolute",
                 "top": props.originalTop,
                 "left": props.originalLeft,
