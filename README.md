@@ -1,5 +1,24 @@
 # standoutjs
 
+## Installation
+
+### CDN
+Insert this code after jQuery import:
+```html
+<script src="https://cdn.jsdelivr.net/npm/standoutjs@2.3.3/dist/standout.min.js"></script>
+```
+
+### NPM
+Install using npm:
+```
+npm install --save standoutjs
+```
+
+Then load it into your app.js:
+```javascript
+require('standoutjs');
+```
+
 ## Basic usage
 ```javascript
 $(yourSelector).standout();
