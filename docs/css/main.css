@@ -1,0 +1,191 @@
+/* COMMON */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+}
+
+body {
+    background-color: #FFFFFF;
+    color: #444444;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 14pt;
+    font-weight: 300;
+}
+
+.container-fluid {
+    max-width: 990px;
+    margin: 0 auto;
+}
+
+.jumbotron {
+    background-color: #192024;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.jumbotron h1 {
+    margin-bottom: 1em;
+    min-width: 320px;
+    padding: 1em;
+}
+
+.jumbotron ::before, .jumbotron ::after {
+    background-color: #192024;
+}
+
+.info {
+    padding: .75em 1.25em;
+}
+
+.inset {
+    padding: 0 1.25em;
+}
+
+.flex-list {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.flex-list li {
+    background-color: #FFFFFF;
+    border: 1px solid #192024;
+    text-align: center;
+}
+
+.flex-list li a {
+    color: #192024;
+    display: inline-block;
+    padding: 1.5em;
+    width: 100%;
+    height: 100%;
+    transition: all .8s;
+}
+
+.flex-list li a:hover {
+    color: #e95d3c;
+    background-color: #192024;
+}
+
+.flex-list .fas, .flex-list .fab {
+    font-size: 3em;
+}
+
+.lorem {
+    color: #BBBBBB;
+}
+
+.footer {
+    background-color: #F7F7F7;
+    color: #444444;
+    text-align: left;
+}
+
+.footer h5, .footer p {
+    font-size: 12pt;
+}
+
+/* UTILS */
+
+.alert {
+    background-color: #fff3cd;
+    border: 1px solid transparent;
+    border-color: #ffeeba;
+    border-radius: .25em;
+    color: #856404;
+    margin-bottom: 3em;
+    position: relative;
+    padding: .75em 1.25em;
+}
+
+.background-effect li a {
+    background-color: #e95d3c;
+    color: #192024;
+}
+
+.col-md-4 {
+    flex-basis: calc((100% / 3) - 1%);
+}
+
+.col-md-6 {
+    flex-basis: calc((100% / 2) - 1%);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.white-border {
+    border: 1px solid #FFFFFF;
+}
+
+.half-border {
+    position: relative;
+}
+
+.half-border::before, .half-border::after {
+    content: '';
+    height: 2px;
+    position: absolute;
+    width: 75%;
+}
+
+.half-border::before {
+    left: calc(25% + 1px);
+    top: -1px;
+}
+
+.half-border::after {
+    bottom: -1px;
+    right: calc(25% + 1px);
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.width-50 {
+    width: 50%;
+}
+
+.block-center {
+    margin: 0 auto;
+}
+
+.margin-t-1 {
+    margin-top: 1em;
+}
+
+.margin-b-1 {
+    margin-bottom: 1em;
+}
+
+.margin-b-3 {
+    margin-bottom: 3em;
+}
+
+.margin-b-02 {
+    margin-bottom: 0.2em;
+}
+
+.margin-b-07 {
+    margin-bottom: 0.7em;
+}
+
+.padding-tb-2 {
+    padding: 2em 0;
+}
+
+.padding-tb-5 {
+    padding: 5em 0;
+}
