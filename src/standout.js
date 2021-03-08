@@ -1,32 +1,4 @@
-/* eslint-disable */
-(function (factory) {
-	if (typeof define === "function" && define.amd) {
-		// AMD. Register as an anonymous module.
-		define(["jquery"], factory);
-	} else if (typeof module === "object" && module.exports) {
-		// Node/CommonJS
-		module.exports = function( root, jQuery ) {
-			if (typeof jQuery === "undefined") {
-				// require('jQuery') returns a factory that requires window to build a jQuery instance, we normalize how we use modules
-				// that require this pattern but the window provided is a noop if it's defined (how jquery works)
-				if (typeof window !== "undefined") {
-					jQuery = require("jquery");
-				}
-				else {
-					jQuery = require("jquery")(root);
-				}
-			}
-			factory(jQuery);
-			return jQuery;
-		};
-	} else {
-		// Browser globals
-		factory(jQuery);
-	}
-
-}(function($, window, document, undefined) {
-
-    /* eslint-enable */
+(function(jQuery, window, document, undefined) {
 
     "use strict";
 
@@ -135,7 +107,7 @@
     }
 
     // Avoid Plugin.prototype conflicts
-    $.extend(Standout.prototype, {
+    jQuery.extend(Standout.prototype, {
 
         _init() {
 
@@ -151,13 +123,13 @@
 
             if (this.options.lightBoxEffect) {
 
-                if ($(`#${this.options.overlayId}`).length === 0) {
+                if (jQuery(`#${this.options.overlayId}`).length === 0) {
 
                     this._setOverlayLayout(this.options);
 
                 }
 
-                if ($(`.${this.clonedId}`).length === 0) {
+                if (jQuery(`.${this.clonedId}`).length === 0) {
 
                     this._duplicateElement(this.element, this.clonedId);
 
@@ -185,7 +157,7 @@
 
             const obj = this;
 
-            $(window).on("resize scroll", function() {
+            jQuery(window).on("resize scroll", function() {
 
                 // obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
                 obj._initObj();
@@ -372,9 +344,9 @@
             props.elementTop = this.$element.offset().top;
             props.elementCenter = props.elementTop + props.elementHeight / 2;
             props.elementBottom = props.elementTop + props.elementHeight;
-            props.viewportHeight = $(window).height();
-            props.viewportTop = $(window).scrollTop();
-            props.viewportBottom = props.viewportTop + $(window).height();
+            props.viewportHeight = jQuery(window).height();
+            props.viewportTop = jQuery(window).scrollTop();
+            props.viewportBottom = props.viewportTop + jQuery(window).height();
             props.viewportTopLimit = props.viewportHeight * this.options.top;
             props.viewportBottomLimit = props.viewportHeight - props.viewportHeight * this.options.bottom;
             props.viewportCenterLimit = props.viewportTopLimit + (props.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
@@ -465,11 +437,11 @@
 
             const props = this.$element.objProps;
             const overlayPercentage = this._getPrevNextElementOpacity();
-            $("#overlayStandout").css({
+            jQuery("#overlayStandout").css({
                 "display": "block",
                 "opacity": overlayPercentage < 0.75 ? overlayPercentage : 0.75
             });
-            $(`.${this.clonedId}`).css({
+            jQuery(`.${this.clonedId}`).css({
                 "display": "block",
                 "position": "absolute",
                 "top": props.originalTop,
@@ -485,7 +457,7 @@
 
         _getOptions(options) {
 
-            return options.lightBoxEffect ? $.extend({}, defaults, options, lightboxOptions) : $.extend({}, defaults, options);
+            return options.lightBoxEffect ? jQuery.extend({}, defaults, options, lightboxOptions) : jQuery.extend({}, defaults, options);
 
         },
 
@@ -494,8 +466,8 @@
             let obj = false;
             if (typeof allStandout[i] !== "undefined" && i > -1 && i < allStandout.length) {
 
-                obj = $(allStandout[i].element);
-                obj.objProps = $.extend({}, objProps);
+                obj = jQuery(allStandout[i].element);
+                obj.objProps = jQuery.extend({}, objProps);
 
             }
             return obj;
@@ -516,32 +488,32 @@
 
         _setDemoLayout(opt) {
 
-            let overlay = $("<div />").css(demoLayout.demoLayoutTop).css("height", `calc(100vh * ${opt.top})`).attr("id", "demoLayoutTop");
-            $("body").append(overlay);
-            overlay = $("<div />").css(demoLayout.demoLayoutCenter).css("top", `calc(100vh * ${opt.top} + (100vh - (100vh * ${opt.top} + 100vh * ${opt.bottom})) / 2)`);
-            $("body").append(overlay);
-            overlay = $("<div />").css(demoLayout.demoLayoutBottom).css("height", `calc(100vh * ${opt.bottom})`).attr("id", "demoLayoutBottom");
-            $("body").append(overlay);
+            let overlay = jQuery("<div />").css(demoLayout.demoLayoutTop).css("height", `calc(100vh * ${opt.top})`).attr("id", "demoLayoutTop");
+            jQuery("body").append(overlay);
+            overlay = jQuery("<div />").css(demoLayout.demoLayoutCenter).css("top", `calc(100vh * ${opt.top} + (100vh - (100vh * ${opt.top} + 100vh * ${opt.bottom})) / 2)`);
+            jQuery("body").append(overlay);
+            overlay = jQuery("<div />").css(demoLayout.demoLayoutBottom).css("height", `calc(100vh * ${opt.bottom})`).attr("id", "demoLayoutBottom");
+            jQuery("body").append(overlay);
 
         },
 
         _setOverlayLayout(opt) {
 
-            const overlay = $("<div />").css(opt.overlay).attr("id", opt.overlayId);
-            $("body").append(overlay);
+            const overlay = jQuery("<div />").css(opt.overlay).attr("id", opt.overlayId);
+            jQuery("body").append(overlay);
 
         },
 
         _duplicateElement(el, c) {
 
-            $(el).clone(true, true).addClass(c).css("display", "none")
+            jQuery(el).clone(true, true).addClass(c).css("display", "none")
                 .appendTo("body");
 
         },
     });
 
     /* eslint-disable */
-    $.fn[pluginName] = function(options) {
+    jQuery.fn[pluginName] = function(options) {
     /* eslint-enable */
 
         if (options === undefined || typeof options === "object") {
@@ -552,13 +524,13 @@
 
                 // Only allow the plugin to be instantiated once,
                 // so we check that the element has no plugin instantiation yet
-                if (!$.data(this, `plugin_${pluginName}`)) {
+                if (!jQuery.data(this, `plugin_${pluginName}`)) {
 
                     // if it has no instance, create a new one,
                     // pass options to our plugin constructor,
                     // and store the plugin instance
                     // in the elements jQuery data object.
-                    $.data(this, `plugin_${pluginName}`, new Standout(allElements[i], i, options, (i === lastIdx)));
+                    jQuery.data(this, `plugin_${pluginName}`, new Standout(allElements[i], i, options, (i === lastIdx)));
 
                 }
 
@@ -574,7 +546,7 @@
             // Allow instances to be destroyed via the 'destroy' method
             if (options === "destroy") {
 
-                $.data(this, `plugin_${pluginName}`, null);
+                jQuery.data(this, `plugin_${pluginName}`, null);
 
             }
 
@@ -586,4 +558,4 @@
 
     };
 
-}(jQuery, window, document)));
+}(jQuery, window, document));
