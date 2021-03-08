@@ -339,6 +339,7 @@
 
             const props = this.$element.objProps;
             props.initialized = true;
+            props.display = this.$element.css("display");
             props.elementWidth = this.$element.outerWidth();
             props.elementHeight = this.$element.outerHeight();
             props.elementTop = this.$element.offset().top;
@@ -437,8 +438,8 @@
 
             const props = this.$element.objProps;
             const overlayPercentage = this._getPrevNextElementOpacity();
-            const displayOverlay = overlayPercentage <= 0 ? "none" : "block";
-            const displayElement = this._getCurrentElementOpacity() <= 0 ? "none" : "block";
+            const displayOverlay = overlayPercentage <= 0 ? "none" : props.display;
+            const displayElement = this._getCurrentElementOpacity() <= 0 ? "none" : props.display;
 
             jQuery("#overlayStandout").css({
                 "display": displayOverlay,
