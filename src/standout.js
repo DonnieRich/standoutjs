@@ -339,7 +339,7 @@
 
             const props = this.$element.objProps;
             props.initialized = true;
-            props.elementWidth = this.$element.width();
+            props.elementWidth = this.$element.outerWidth();
             props.elementHeight = this.$element.outerHeight();
             props.elementTop = this.$element.offset().top;
             props.elementCenter = props.elementTop + props.elementHeight / 2;
