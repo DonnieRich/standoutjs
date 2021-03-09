@@ -293,7 +293,7 @@
         failIfDirty,
         gitPull,
         bump,
-        //changelog,
+        changelog,
         year,
         clean,
         copy,
