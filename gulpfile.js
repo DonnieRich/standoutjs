@@ -292,19 +292,19 @@
         failIfNotMain, 
         failIfDirty,
         gitPull,
-        //bump,
-        changelog,
+        bump,
+        //changelog,
         year,
         clean,
         copy,
         header,
         uglify,
         docs,
-        // gitAdd,
-        // gitCommit,
-        // gitTag,
-        // gitPush,
-        // npmPublish
+        gitAdd,
+        gitCommit,
+        gitTag,
+        gitPush,
+        npmPublish
     );
 
     exports.release = release;

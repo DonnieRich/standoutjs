@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * A jQuery plugin that creates events when a certain DOM element is in a position relative to a selected portion of the viewport.
- * v2.3.4 - built 2021-06-08
+ * v2.3.5 - built 2021-30-09
  * Licensed under the MIT License.
  * https://github.com/DonnieRich/standoutjs
  * ----------------------------------------------------------------------------
@@ -31,7 +31,7 @@
             backgroundColor: "#000000",
             opacity: "0",
             width: "100%",
-            height: "100%",
+            height: "100vh",
             position: "fixed",
             top: "0",
             left: "0",
@@ -447,7 +447,7 @@
 
             const props = this.$element.objProps;
             const overlayPercentage = this._getPrevNextElementOpacity();
-            const displayOverlay = overlayPercentage <= 0 ? "none" : props.display;
+            const displayOverlay = overlayPercentage <= 0 ? "none" : "block";
             const displayElement = this._getCurrentElementOpacity() <= 0 ? "none" : props.display;
 
             jQuery("#overlayStandout").css({
