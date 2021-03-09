@@ -227,7 +227,7 @@
             version   = getPackageJson().version,
             date      = dateFormat(now, 'yyyy-mm-dd'),
             changelog = fs.readFileSync(filename).toString(),
-            lastDate =  dateFormat(fs.statSync(filename).mtime, 'yyyy-MM-dd');
+            lastDate =  dateFormat(fs.statSync(filename).mtime, 'yyyy-mm-dd');
 
         exec('git log --since="' + lastDate + ' 00:00:00" --oneline --pretty=format:"%s"', function(err, stdout) {
             if (err) {
@@ -238,7 +238,6 @@
                 return cb();
             }
 
-
             let prefixes = ['(new)', '(fix)', '(chg)'];
             let changes = {};
 
@@ -247,8 +246,6 @@
                     return line.indexOf(p) !== -1;
                 }).join('\n').replace(/ *\([^)]*\) */g,'').replace(/\n/g, '\n* ');
             });
-
-            
 
             const updates = [
                 '### Standout ' + version + ' ' + date,
@@ -295,7 +292,7 @@
         failIfNotMain, 
         failIfDirty,
         gitPull,
-        bump,
+        //bump,
         changelog,
         year,
         clean,
@@ -303,11 +300,11 @@
         header,
         uglify,
         docs,
-        gitAdd,
-        gitCommit,
-        gitTag,
-        gitPush,
-        npmPublish
+        // gitAdd,
+        // gitCommit,
+        // gitTag,
+        // gitPush,
+        // npmPublish
     );
 
     exports.release = release;
