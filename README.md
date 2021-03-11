@@ -5,7 +5,7 @@
 ### CDN
 Insert this code after jQuery import:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/standoutjs@2.3.3/dist/standout.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/standoutjs@latest/dist/standout.min.js"></script>
 ```
 
 ### NPM
