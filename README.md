@@ -11,7 +11,13 @@ Insert this code after jQuery import:
 ### NPM
 Install using npm:
 ```
-npm install --save standoutjs
+npm install standoutjs
+```
+
+### YARN
+Install using yarn:
+```
+yarn add standoutjs
 ```
 
 Then load it into your app.js:
