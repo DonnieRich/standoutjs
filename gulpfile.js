@@ -42,7 +42,7 @@
             ].join('\n'),
             vars: {
                 pkg: pkg,
-                datetime: dateFormat(now, 'yyyy-MM-dd'),
+                datetime: dateFormat(now, 'yyyy-mm-dd'),
                 year: dateFormat(now, 'yyyy')
             }
         }
@@ -141,7 +141,7 @@
 
     function meta(cb) {
         const metadata = {
-                date: dateFormat(now, 'yyyy-MM-dd HH:MM'),
+                date: dateFormat(now, 'yyyy-mm-dd HH:MM'),
                 version: 'v' + getPackageJson().version
             },
             json = JSON.stringify(metadata, null, 4);
