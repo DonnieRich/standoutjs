@@ -27,6 +27,7 @@
     "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.0.1",
     "gulp-zip": "^5.0.2",
+    "qunit": "^2.14.0",
     "yargs": "^16.2.0"
   },
   "scripts": {
