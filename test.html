@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Test Suite</title>
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.14.0.css">
+
+    <style>
+        .test-area.visible {
+            position: fixed;
+            top: 50px;
+            bottom: 0;
+            left: auto;
+            right: 250px;
+            background-color: white;
+            opacity: 0.6;
+            width: 1000px;
+            height: 1000px;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture">
+        
+    </div>
+    <div class="test-area visible">
+        <div class="main" style="width: 100%; height: 300px; padding-top: 0px; overflow-y: scroll; overflow-x: hidden; margin-top: 40px;">
+            <div class="main-content" style="width: 100%; height: 800px; padding-top: 0px; position: relative;">
+                <div class="item" style="width: 50%; height: 100px; position: absolute; top: 300px; left: 50%; transform: translate(-50%); background-color: yellow;">
+    
+                </div>
+            </div>        
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="src/standout.js"></script>
+    <script src="https://code.jquery.com/qunit/qunit-2.14.0.js"></script>
+
+    <script>
+        $(function() {
+            let evnt = "";
+            $('.item').standout({
+                top: 0.5,
+                bottom: 0.3,
+                window: ".main",
+                body: ".main",
+                showDemoLayout: true
+            }).on("U", function() {
+                evnt = "U";
+            }).on("EB", function() {
+                evnt = "EB";
+            }).on("O", function() {
+                evnt = "O";
+            }).on("EXB", function() {
+                evnt = "EXB";
+            }).on("ET", function() {
+                evnt = "ET";
+            }).on("EXT", function() {
+                evnt = "EXT";
+            }).on("C", function() {
+                evnt = "C";
+            });
+
+            function triggerScroll(px, cb) {
+                jQuery('.main').scrollTop(px).trigger("scroll");
+                cb(evnt);
+            }
+            
+            QUnit.module('Events');
+
+            QUnit.test('Under', assert => {
+                const done = assert.async();
+
+                triggerScroll( 10, e => {
+                    assert.equal(e, "U", "Event Under detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Entering from bottom', assert => {
+                const done = assert.async();
+
+                triggerScroll( 95, e => {
+                    assert.equal(e, "EB", "Event Entering from Bottom detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Center', assert => {
+                const done = assert.async();
+
+                triggerScroll( 150, e => {
+                    assert.equal(e, "C", "Event Center detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Exiting from top', assert => {
+                const done = assert.async();
+
+                triggerScroll( 220, e => {
+                    assert.equal(e, "EXT", "Event Exiting from Top detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Over', assert => {
+                const done = assert.async();
+
+                triggerScroll( 270, e => {
+                    assert.equal(e, "O", "Event Over detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Entering from top', assert => {
+                const done = assert.async();
+
+                triggerScroll( 220, e => {
+                    assert.equal(e, "ET", "Event Entering from Top detected!");
+                    done();
+                });
+            });
+
+            QUnit.test('Exiting from bottom', assert => {
+                const done = assert.async();
+
+                triggerScroll( 95, e => {
+                    assert.equal(e, "EXB", "Event Exiting from Bottom detected!");
+                    done();
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
