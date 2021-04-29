@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * A jQuery plugin that creates events when a certain DOM element is in a position relative to a selected portion of the viewport.
- * v2.3.5 - built 2021-30-09
+ * v3.0.0 - built 2021-04-29
  * Licensed under the MIT License.
  * https://github.com/DonnieRich/standoutjs
  * ----------------------------------------------------------------------------
@@ -39,7 +39,9 @@
             display: "none"
         },
         overlayId: "overlayStandout",
-        enabled: true
+        enabled: true,
+        window: window,
+        body: "body"
     };
 
     const lightboxOptions = {
@@ -94,7 +96,7 @@
             opacity: "0.75",
             width: "100%",
             position: "fixed",
-            bottom: "0",
+            top: "0",
             left: "0",
             zIndex: "9999"
         }
@@ -121,6 +123,8 @@
         _init() {
 
             this._buildCache();
+            this._initViewport();
+            this._initObj();
             this._bindEvents();
 
             if (this.options.showDemoLayout && !demoInit) {
@@ -166,16 +170,12 @@
 
             const obj = this;
 
-            jQuery(window).on("resize scroll", function() {
+            jQuery(obj.options.window).on("resize scroll", function() {
 
-                // obj.$element.objProps.init(obj.$element, obj.i).update(obj.$element, obj.options);
-                obj._initObj();
                 obj._updateObj();
 
-                // if(obj.$element.objProps._isInViewport()) {
                 if (obj._isInViewport()) {
 
-                    // obj.$element.objProps.currentEvent = obj.$element.objProps.status();
                     obj._setCurrentEvent();
                     if ((!obj.options.oncePerEvent)
                     || (obj.options.onlyFirstTime && obj.options.oncePerEvent && !obj._checkIfEventAlreadyTriggered())
@@ -201,8 +201,8 @@
 
         _isInViewport() {
 
-            return this.$element.objProps.elementBottom > this.$element.objProps.viewportTop
-                && this.$element.objProps.elementTop < this.$element.objProps.viewportBottom
+            return this.$element.objProps.elementBottom > this.$element.objProps.extremeTop
+                && this.$element.objProps.elementTop < this.$element.objProps.extremeBottom
                 && this.$element.objProps.initialized;
 
         },
@@ -210,7 +210,7 @@
         _setCurrentEvent() {
 
             const props = this.$element.objProps;
-            let event = "U";
+            let event = "U"; // Gestire meglio Under - perché viene lanciato troppe volte
             if (props.lastViewportTop === 0) {
 
                 props.lastViewportTop = props.viewportTop;
@@ -223,7 +223,7 @@
 
             } else {
 
-                if (props.elementBottomPosition < props.viewportTopLimit) {
+                if (props.elementBottomPosition <= props.viewportTopLimit) {
 
                     event = "O";
 
@@ -336,17 +336,57 @@
 
         },
 
+        _initViewport() {
+
+            const isWindow = this._isWindow();
+            const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
+            this._updateViewport(offset);
+            this.$element.objProps.viewportHeight = jQuery(this.options.window).height();
+            this.$element.objProps.viewportWidth = jQuery(this.options.window).width();
+            this.$element.objProps.viewportBottom = this.$element.objProps.viewportTop + this.$element.objProps.viewportHeight;
+            this.$element.objProps.viewportLeft = isWindow ? 0 : jQuery(this.options.window).offset().left;
+
+            /* NEW METHOD */
+            this.$element.objProps.centerLimit = ((this.$element.objProps.viewportHeight * this.options.top) + offset)
+                                                    + (this.$element.objProps.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
+            this.$element.objProps.distanceTop = this.$element.objProps.centerLimit - (this.$element.objProps.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
+            this.$element.objProps.distanceBottom = this.$element.objProps.centerLimit + (this.$element.objProps.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
+
+            this.$element.objProps.extremeTop = this.$element.objProps.distanceTop - (this.$element.objProps.viewportHeight * this.options.top);
+            this.$element.objProps.extremeBottom = this.$element.objProps.distanceBottom + (this.$element.objProps.viewportHeight * this.options.bottom);
+
+            this.$element.objProps.viewportTopLimit = this.$element.objProps.distanceTop;
+            this.$element.objProps.viewportBottomLimit = this.$element.objProps.distanceBottom;
+            this.$element.objProps.viewportCenterLimit = this.$element.objProps.centerLimit;
+            console.log("INIT VIEWPORT METHOD - THIS LOG SHOULD SHOW UP ONLY ONE TIME");
+
+        },
+
+        _updateViewport(offset) {
+
+            this.$element.objProps.viewportTop = jQuery(this.options.window).scrollTop();
+
+        },
+
+        _isWindow() {
+            return this.options.window === window;
+        },
+
         _initObj() {
 
             this.$element.objProps.originalTop = this.$element.offset().top;
             this.$element.objProps.originalLeft = this.$element.offset().left;
             this.$element.objProps.initialized = true;
+            console.log("INIT OBJ METHOD - THIS LOG SHOULD SHOW UP ONLY ONE TIME");
 
         },
 
         _updateObj() {
 
             const props = this.$element.objProps;
+            const isWindow = this._isWindow();
+            const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
+            this._updateViewport(offset);
             props.initialized = true;
             props.display = this.$element.css("display");
             props.elementWidth = this.$element.outerWidth();
@@ -354,16 +394,9 @@
             props.elementTop = this.$element.offset().top;
             props.elementCenter = props.elementTop + props.elementHeight / 2;
             props.elementBottom = props.elementTop + props.elementHeight;
-            props.viewportHeight = jQuery(window).height();
-            props.viewportTop = jQuery(window).scrollTop();
-            props.viewportBottom = props.viewportTop + jQuery(window).height();
-            props.viewportTopLimit = props.viewportHeight * this.options.top;
-            props.viewportBottomLimit = props.viewportHeight - props.viewportHeight * this.options.bottom;
-            props.viewportCenterLimit = props.viewportTopLimit + (props.viewportHeight * (1 - (this.options.top + this.options.bottom)) * 0.5);
-            props.elementTopPosition = props.elementTop - props.viewportTop;
-            props.elementCenterPosition = props.elementTopPosition + props.elementHeight / 2;
-            props.elementBottomPosition = props.elementTopPosition + props.elementHeight;
-
+            props.elementTopPosition = props.elementTop;
+            props.elementCenterPosition = props.elementCenter;
+            props.elementBottomPosition = props.elementBottom;
         },
 
         _calculateOpacityValue(limit) {
@@ -500,27 +533,41 @@
         },
 
         _setDemoLayout(opt) {
+            const props = this.$element.objProps;
+            const isWindow = this._isWindow();
+            const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
+            demoLayout.demoLayoutTop.top = props.viewportTop + offset;
+            demoLayout.demoLayoutBottom.top = (props.viewportBottom + offset) - props.viewportHeight * opt.bottom;
+            demoLayout.demoLayoutTop.width = props.viewportWidth;
+            demoLayout.demoLayoutCenter.width = props.viewportWidth;
+            demoLayout.demoLayoutBottom.width = props.viewportWidth;
+            demoLayout.demoLayoutTop.left = props.viewportLeft;
+            demoLayout.demoLayoutCenter.left = props.viewportLeft;
+            demoLayout.demoLayoutBottom.left = props.viewportLeft;
 
-            let overlay = jQuery("<div />").css(demoLayout.demoLayoutTop).css("height", `calc(100vh * ${opt.top})`).attr("id", "demoLayoutTop");
-            jQuery("body").append(overlay);
-            overlay = jQuery("<div />").css(demoLayout.demoLayoutCenter).css("top", `calc(100vh * ${opt.top} + (100vh - (100vh * ${opt.top} + 100vh * ${opt.bottom})) / 2)`);
-            jQuery("body").append(overlay);
-            overlay = jQuery("<div />").css(demoLayout.demoLayoutBottom).css("height", `calc(100vh * ${opt.bottom})`).attr("id", "demoLayoutBottom");
-            jQuery("body").append(overlay);
+            let height = props.viewportHeight * opt.top;
+            let overlay = jQuery("<div />").css(demoLayout.demoLayoutTop).css("height", height).attr("id", "demoLayoutTop");
+            jQuery(opt.body).append(overlay);
+            let top = (demoLayout.demoLayoutTop.top + props.viewportHeight * opt.top) + (props.viewportHeight - (props.viewportHeight * opt.top + props.viewportHeight * opt.bottom)) / 2;
+            overlay = jQuery("<div />").css(demoLayout.demoLayoutCenter).css("top", top);
+            jQuery(opt.body).append(overlay);
+            height = props.viewportHeight * opt.bottom;
+            overlay = jQuery("<div />").css(demoLayout.demoLayoutBottom).css("height", height).attr("id", "demoLayoutBottom");
+            jQuery(opt.body).append(overlay);
 
         },
 
         _setOverlayLayout(opt) {
 
             const overlay = jQuery("<div />").css(opt.overlay).attr("id", opt.overlayId);
-            jQuery("body").append(overlay);
+            jQuery(opt.body).append(overlay);
 
         },
 
         _duplicateElement(el, c) {
 
             jQuery(el).clone(true, true).addClass(c).css("display", "none")
-                .appendTo("body");
+                .appendTo(opt.body);
 
         },
     });

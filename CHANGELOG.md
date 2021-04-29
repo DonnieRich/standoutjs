@@ -2,6 +2,18 @@
 
 ## CHANGE LOG
 
+### Standout 3.0.0 2021-04-29
+
+#### New
+* Added page for unit test
+* Refactored event detection method
+
+#### Fix
+* Overlay height and display
+
+#### Changes
+* 
+
 ### Standout 2.3.5 2021-03-09
 
 #### New

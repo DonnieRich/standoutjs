@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+    
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .test {
+        width: 100%;
+        height: 2px;
+        background-color: green;
+        position: absolute;
+        top: 300px;
+    }
+    </style>
+</head>
+<body>
+
+    <div class="main" style="width: 100%; height: 300px; padding-top: 0px; overflow-y: scroll; margin-top: 40px; margin-left: 40px;">
+        <div class="main-content" style="width: 100%; height: 800px; padding-top: 0px; position: relative;">
+            <div class="item" style="width: 50%; height: 100px; position: absolute; top: 300px; left: 50%; transform: translate(-50%); background-color: yellow;">
+    
+            </div>
+            <div class="test"></div>
+        </div>        
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="src/standout.js"></script>
+    <script>
+        $(function() {
+            let evnt = "";
+
+            //$('.main').scrollTop(1);
+
+            $('.item').standout({
+                top: 0.5,
+                bottom: 0.3,
+                window: ".main",
+                body: ".main",
+                showDemoLayout: true
+            }).on("U", function() {
+                evnt = "U";
+                console.log(evnt);
+            }).on("EB", function() {
+                evnt = "EB";
+                console.log("AAA");
+            }).on("ET", function(e, obj){
+                console.log("ENTERING FROM TOP " + obj.idx);
+            }).on("EXT", function(e, obj){
+                console.log("EXITING FROM TOP " + obj.idx);
+            }).on("EB", function(e, obj){
+                console.log("ENTERING FROM BOTTOM " + obj.idx);
+            }).on("EXB", function(e, obj){
+                console.log("EXITING FROM BOTTOM " + obj.idx);
+            }).on("C", function(e, obj){
+                console.log("ELEMENT AT CENTER " + obj.idx);
+            }).on("O", function(e, obj){
+                console.log("ELEMENT OVER " + obj.idx);
+            }).on("U", function(e, obj){
+                console.log("ELEMENT UNDER " + obj.idx);
+            });
+
+        })
+
+    </script>
+</body>
+</html>
