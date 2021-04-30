@@ -50,18 +50,25 @@
                 showDemoLayout: true
             }).on("U", function() {
                 evnt = "U";
+                console.log(evnt);
             }).on("EB", function() {
                 evnt = "EB";
+                console.log(evnt);
             }).on("O", function() {
                 evnt = "O";
+                console.log(evnt);
             }).on("EXB", function() {
                 evnt = "EXB";
+                console.log(evnt);
             }).on("ET", function() {
                 evnt = "ET";
+                console.log(evnt);
             }).on("EXT", function() {
                 evnt = "EXT";
+                console.log(evnt);
             }).on("C", function() {
                 evnt = "C";
+                console.log(evnt);
             });
 
             function triggerScroll(px, cb) {
@@ -78,6 +85,8 @@
                     assert.equal(e, "U", "Event Under detected!");
                     done();
                 });
+
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Entering from bottom', assert => {
@@ -87,6 +96,8 @@
                     assert.equal(e, "EB", "Event Entering from Bottom detected!");
                     done();
                 });
+                
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Center', assert => {
@@ -96,6 +107,8 @@
                     assert.equal(e, "C", "Event Center detected!");
                     done();
                 });
+
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Exiting from top', assert => {
@@ -105,6 +118,8 @@
                     assert.equal(e, "EXT", "Event Exiting from Top detected!");
                     done();
                 });
+                
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Over', assert => {
@@ -114,24 +129,34 @@
                     assert.equal(e, "O", "Event Over detected!");
                     done();
                 });
+                
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Entering from top', assert => {
                 const done = assert.async();
 
+                triggerScroll( 300, e => console.log("setup"));
+
                 triggerScroll( 220, e => {
                     assert.equal(e, "ET", "Event Entering from Top detected!");
                     done();
                 });
+                
+                triggerScroll( 0, e => console.log("reset"));
             });
 
             QUnit.test('Exiting from bottom', assert => {
                 const done = assert.async();
+                
+                triggerScroll( 300, e => console.log("setup"));
 
                 triggerScroll( 95, e => {
                     assert.equal(e, "EXB", "Event Exiting from Bottom detected!");
                     done();
                 });
+
+                triggerScroll( 0, e => console.log("reset"));
             });
 
         });
