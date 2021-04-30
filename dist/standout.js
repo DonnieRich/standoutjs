@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * A jQuery plugin that creates events when a certain DOM element is in a position relative to a selected portion of the viewport.
- * v3.0.0 - built 2021-04-29
+ * v3.1.0 - built 2021-04-30
  * Licensed under the MIT License.
  * https://github.com/DonnieRich/standoutjs
  * ----------------------------------------------------------------------------
@@ -40,7 +40,7 @@
         },
         overlayId: "overlayStandout",
         enabled: true,
-        window: window,
+        window,
         body: "body"
     };
 
@@ -122,15 +122,16 @@
 
         _init() {
 
+            const offset = this._isWindow() ? 0 : jQuery(this.options.window).offset().top;
             this._buildCache();
-            this._initViewport();
-            this._initObj();
+            this._initViewport(offset);
+            this._initObj(offset);
             this._bindEvents();
 
             if (this.options.showDemoLayout && !demoInit) {
 
                 demoInit = true;
-                this._setDemoLayout(this.options);
+                this._setDemoLayout(this.options, offset);
 
             }
 
@@ -144,7 +145,7 @@
 
                 if (jQuery(`.${this.clonedId}`).length === 0) {
 
-                    this._duplicateElement(this.element, this.clonedId);
+                    this._duplicateElement(this.element, this.clonedId, this.options);
 
                 }
 
@@ -201,8 +202,8 @@
 
         _isInViewport() {
 
-            return this.$element.objProps.elementBottom > this.$element.objProps.extremeTop
-                && this.$element.objProps.elementTop < this.$element.objProps.extremeBottom
+            return this.$element.objProps.elementBottomPosition > this.$element.objProps.extremeTop
+                && this.$element.objProps.elementTopPosition < this.$element.objProps.extremeBottom
                 && this.$element.objProps.initialized;
 
         },
@@ -210,7 +211,7 @@
         _setCurrentEvent() {
 
             const props = this.$element.objProps;
-            let event = "U"; // Gestire meglio Under - perché viene lanciato troppe volte
+            let event = "U";
             if (props.lastViewportTop === 0) {
 
                 props.lastViewportTop = props.viewportTop;
@@ -260,7 +261,6 @@
             }
 
             props.lastViewportTop = props.viewportTop;
-            // return event;
             props.currentEvent = event;
 
         },
@@ -340,7 +340,7 @@
 
             const isWindow = this._isWindow();
             const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
-            this._updateViewport(offset);
+            this._updateViewport();
             this.$element.objProps.viewportHeight = jQuery(this.options.window).height();
             this.$element.objProps.viewportWidth = jQuery(this.options.window).width();
             this.$element.objProps.viewportBottom = this.$element.objProps.viewportTop + this.$element.objProps.viewportHeight;
@@ -358,18 +358,19 @@
             this.$element.objProps.viewportTopLimit = this.$element.objProps.distanceTop;
             this.$element.objProps.viewportBottomLimit = this.$element.objProps.distanceBottom;
             this.$element.objProps.viewportCenterLimit = this.$element.objProps.centerLimit;
-            console.log("INIT VIEWPORT METHOD - THIS LOG SHOULD SHOW UP ONLY ONE TIME");
 
         },
 
-        _updateViewport(offset) {
+        _updateViewport() {
 
             this.$element.objProps.viewportTop = jQuery(this.options.window).scrollTop();
 
         },
 
         _isWindow() {
+
             return this.options.window === window;
+
         },
 
         _initObj() {
@@ -377,7 +378,6 @@
             this.$element.objProps.originalTop = this.$element.offset().top;
             this.$element.objProps.originalLeft = this.$element.offset().left;
             this.$element.objProps.initialized = true;
-            console.log("INIT OBJ METHOD - THIS LOG SHOULD SHOW UP ONLY ONE TIME");
 
         },
 
@@ -385,8 +385,7 @@
 
             const props = this.$element.objProps;
             const isWindow = this._isWindow();
-            const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
-            this._updateViewport(offset);
+            this._updateViewport();
             props.initialized = true;
             props.display = this.$element.css("display");
             props.elementWidth = this.$element.outerWidth();
@@ -394,9 +393,24 @@
             props.elementTop = this.$element.offset().top;
             props.elementCenter = props.elementTop + props.elementHeight / 2;
             props.elementBottom = props.elementTop + props.elementHeight;
-            props.elementTopPosition = props.elementTop;
-            props.elementCenterPosition = props.elementCenter;
-            props.elementBottomPosition = props.elementBottom;
+
+            if (isWindow) {
+
+                props.elementTopPosition = props.elementTop - props.viewportTop;
+                props.elementCenterPosition = props.elementTopPosition + props.elementHeight / 2;
+                props.elementBottomPosition = props.elementTopPosition + props.elementHeight;
+
+            } else {
+
+                props.elementTopPosition = props.elementTop;
+                props.elementCenterPosition = props.elementCenter;
+                props.elementBottomPosition = props.elementBottom;
+
+            }
+
+            // Check this for future offset more stable fix
+            // https://stackoverflow.com/questions/30875646/jquery-offset-top-slightly-off-every-other-time
+
         },
 
         _calculateOpacityValue(limit) {
@@ -532,12 +546,11 @@
 
         },
 
-        _setDemoLayout(opt) {
+        _setDemoLayout(opt, offset) {
+
             const props = this.$element.objProps;
-            const isWindow = this._isWindow();
-            const offset = isWindow ? 0 : jQuery(this.options.window).offset().top;
-            demoLayout.demoLayoutTop.top = props.viewportTop + offset;
-            demoLayout.demoLayoutBottom.top = (props.viewportBottom + offset) - props.viewportHeight * opt.bottom;
+            demoLayout.demoLayoutTop.top = offset <= 0 ? offset : props.viewportTop + offset;
+            demoLayout.demoLayoutBottom.top = this._getDemoLayoutBottomTopPosition(offset, props, opt);
             demoLayout.demoLayoutTop.width = props.viewportWidth;
             demoLayout.demoLayoutCenter.width = props.viewportWidth;
             demoLayout.demoLayoutBottom.width = props.viewportWidth;
@@ -548,12 +561,26 @@
             let height = props.viewportHeight * opt.top;
             let overlay = jQuery("<div />").css(demoLayout.demoLayoutTop).css("height", height).attr("id", "demoLayoutTop");
             jQuery(opt.body).append(overlay);
-            let top = (demoLayout.demoLayoutTop.top + props.viewportHeight * opt.top) + (props.viewportHeight - (props.viewportHeight * opt.top + props.viewportHeight * opt.bottom)) / 2;
+            const top = (demoLayout.demoLayoutTop.top + props.viewportHeight * opt.top) + (props.viewportHeight - (props.viewportHeight * opt.top + props.viewportHeight * opt.bottom)) / 2;
             overlay = jQuery("<div />").css(demoLayout.demoLayoutCenter).css("top", top);
             jQuery(opt.body).append(overlay);
             height = props.viewportHeight * opt.bottom;
             overlay = jQuery("<div />").css(demoLayout.demoLayoutBottom).css("height", height).attr("id", "demoLayoutBottom");
             jQuery(opt.body).append(overlay);
+
+        },
+
+        _getDemoLayoutBottomTopPosition(offset, props, opt) {
+
+            let topPosition = (props.viewportBottom + offset) - props.viewportHeight * opt.bottom;
+
+            if (offset <= 0) {
+
+                topPosition = props.viewportHeight - props.viewportHeight * opt.bottom;
+
+            }
+
+            return topPosition;
 
         },
 
@@ -564,10 +591,10 @@
 
         },
 
-        _duplicateElement(el, c) {
+        _duplicateElement(el, c, opt) {
 
             jQuery(el).clone(true, true).addClass(c).css("display", "none")
-                .appendTo(opt.body);
+            .appendTo(opt.body);
 
         },
     });

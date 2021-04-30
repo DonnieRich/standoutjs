@@ -2,6 +2,18 @@
 
 ## CHANGE LOG
 
+### Standout 3.1.0 2021-04-30
+
+#### New
+* Added page for unit test
+* Refactored event detection method
+
+#### Fix
+* Fixed bug on previous version
+
+#### Changes
+* 
+
 ### Standout 3.0.0 2021-04-29
 
 #### New
